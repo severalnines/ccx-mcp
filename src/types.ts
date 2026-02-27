@@ -334,9 +334,10 @@ export interface NodeInfo {
   host_uuid: string;
   hostname: string;
   role: string;
-  status: string;
+  host_status: string;
   port: number;
   private_ip: string;
   public_ip: string;
-  maintenance_mode_active: boolean;
+  host_az: string;
+  readonly: boolean;
 }

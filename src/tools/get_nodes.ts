@@ -16,8 +16,8 @@ export function register(server: McpServer) {
       try {
         const raw = await get(
           `/deployment/v2/data-stores/${datastore_uuid}/nodes`,
-        );
-        const nodes = (Array.isArray(raw) ? raw : []) as NodeInfo[];
+        ) as { database_nodes?: NodeInfo[] };
+        const nodes = raw.database_nodes ?? [];
 
         if (nodes.length === 0) {
           return {
@@ -34,11 +34,12 @@ export function register(server: McpServer) {
           host_uuid: n.host_uuid,
           hostname: n.hostname,
           role: n.role,
-          status: n.status,
+          status: n.host_status,
           port: n.port,
           private_ip: n.private_ip,
           public_ip: n.public_ip,
-          maintenance_mode: n.maintenance_mode_active,
+          availability_zone: n.host_az,
+          readonly: n.readonly,
         }));
 
         return {
