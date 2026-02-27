@@ -70,6 +70,16 @@ export async function post(
   return request("POST", path, body);
 }
 
-export async function del(path: string): Promise<unknown> {
-  return request("DELETE", path);
+export async function patch(
+  path: string,
+  body?: unknown,
+): Promise<unknown> {
+  return request("PATCH", path, body);
+}
+
+export async function del(
+  path: string,
+  body?: unknown,
+): Promise<unknown> {
+  return request("DELETE", path, body);
 }

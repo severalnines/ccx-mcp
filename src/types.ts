@@ -287,6 +287,47 @@ export interface AccessRequest {
   description: string;
 }
 
+// ── Backups ──
+
+export interface Backup {
+  backup_id: string;
+  parent_id: string;
+  backup_method: string;
+  backup_type: string;
+  status: string;
+  size: number;
+  started_at: string | null;
+  ended_at: string | null;
+}
+
+export interface BackupsResponse {
+  backups: Backup[];
+  total: number;
+}
+
+// ── Top Queries ──
+
+export interface TopQueriesResponse {
+  timestamp: number;
+  data: DbQuery[];
+}
+
+export interface DbQuery {
+  instance: string;
+  database: string;
+  digest_text: string;
+  sum_time: number;
+  max_time: number;
+  min_time: number;
+  avg_time: number;
+  count_star: number;
+  first_seen: string;
+  last_seen: string;
+  affected_rows: number;
+  examined_rows: number;
+  sent_rows: number;
+}
+
 // ── Nodes ──
 
 export interface NodeInfo {

@@ -19,6 +19,13 @@ import { register as registerListDatabases } from "./tools/list_databases.js";
 import { register as registerCreateDatabase } from "./tools/create_database.js";
 import { register as registerListFirewallRules } from "./tools/list_firewall_rules.js";
 import { register as registerCreateFirewallRule } from "./tools/create_firewall_rule.js";
+import { register as registerDeleteFirewallRule } from "./tools/delete_firewall_rule.js";
+import { register as registerDeleteDbUser } from "./tools/delete_db_user.js";
+import { register as registerScaleDatastore } from "./tools/scale_datastore.js";
+import { register as registerListBackups } from "./tools/list_backups.js";
+import { register as registerRestoreBackup } from "./tools/restore_backup.js";
+import { register as registerGetTopQueries } from "./tools/get_top_queries.js";
+import { register as registerGetStats } from "./tools/get_stats.js";
 
 async function main() {
   // Validate env vars
@@ -68,6 +75,13 @@ async function main() {
   registerCreateDatabase(server);
   registerListFirewallRules(server);
   registerCreateFirewallRule(server);
+  registerDeleteFirewallRule(server);
+  registerDeleteDbUser(server);
+  registerScaleDatastore(server);
+  registerListBackups(server);
+  registerRestoreBackup(server);
+  registerGetTopQueries(server);
+  registerGetStats(server);
 
   // Start stdio transport
   const transport = new StdioServerTransport();

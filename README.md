@@ -29,6 +29,10 @@ Then ask your AI assistant things like:
 - "Get the connection string for my production database"
 - "Add 10.0.0.0/24 as a trusted source on my cluster"
 - "Create a new database user called appuser"
+- "Scale my cluster to a medium instance"
+- "Show me the slowest queries on my database"
+- "List backups for my production cluster"
+- "What's the CPU usage on my database?"
 
 ## Authentication
 
@@ -72,6 +76,7 @@ For programmatic or CI/CD use, set `CCX_CLIENT_ID` and `CCX_CLIENT_SECRET` inste
 | `ccx_delete_datastore` | Delete a cluster (requires explicit confirmation) |
 | `ccx_get_nodes` | Get cluster nodes with roles, status, and IP addresses |
 | `ccx_get_connection_string` | Connection strings in URI, CLI, JDBC, and env formats |
+| `ccx_scale_datastore` | Scale instance size (CPU/RAM) or expand storage volume |
 
 ### Cloud & Plans
 
@@ -93,6 +98,7 @@ For programmatic or CI/CD use, set `CCX_CLIENT_ID` and `CCX_CLIENT_SECRET` inste
 |------|-------------|
 | `ccx_list_db_users` | List database users with grants and auth plugins |
 | `ccx_create_db_user` | Create a user with configurable privileges, host, and admin flag |
+| `ccx_delete_db_user` | Delete a database user |
 
 ### Firewall / Trusted Sources
 
@@ -100,6 +106,21 @@ For programmatic or CI/CD use, set `CCX_CLIENT_ID` and `CCX_CLIENT_SECRET` inste
 |------|-------------|
 | `ccx_list_firewall_rules` | List trusted source CIDRs and allowed ports |
 | `ccx_create_firewall_rule` | Allow a CIDR to connect to the database |
+| `ccx_delete_firewall_rule` | Remove a trusted source CIDR |
+
+### Backups & Recovery
+
+| Tool | Description |
+|------|-------------|
+| `ccx_list_backups` | List available backups with status, type, and timestamps |
+| `ccx_restore_backup` | Restore from a backup with optional point-in-time recovery |
+
+### Monitoring & Performance
+
+| Tool | Description |
+|------|-------------|
+| `ccx_get_top_queries` | Get slowest queries ranked by execution time |
+| `ccx_get_stats` | Get performance metrics (CPU, memory, disk, network, SQL, DB stats) |
 
 ## Supported Databases
 
