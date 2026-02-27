@@ -1,0 +1,220 @@
+{
+  "database": {
+    "vendors": [
+      {
+        "name": "MariaDB",
+        "code": "mariadb",
+        "version": "11.8",
+        "versions": ["10.6", "10.11", "11.4", "11.8"],
+        "num_nodes": [1, 3],
+        "info": "MariaDB Server is a community-developed fork of MySQL.",
+        "enabled": true,
+        "beta": false,
+        "types": [
+          { "code": "replication", "name": "Master / Replicas" },
+          { "code": "galera", "name": "Multi-Master" }
+        ]
+      },
+      {
+        "name": "PostgreSQL",
+        "code": "postgres",
+        "version": "17",
+        "versions": ["14", "15", "16", "17"],
+        "num_nodes": [1, 3],
+        "info": "PostgreSQL is a powerful, open source object-relational database.",
+        "enabled": true,
+        "beta": false,
+        "types": [
+          { "code": "postgres_streaming", "name": "Streaming Replication" }
+        ]
+      },
+      {
+        "name": "Redis",
+        "code": "redis",
+        "version": "7",
+        "versions": ["7"],
+        "num_nodes": [1, 3],
+        "info": "Redis is an open source, in-memory data structure store.",
+        "enabled": true,
+        "beta": false,
+        "types": [
+          { "code": "redis", "name": "Redis Sentinel" }
+        ]
+      },
+      {
+        "name": "Percona",
+        "code": "percona",
+        "version": "8.4",
+        "versions": ["8", "8.4"],
+        "num_nodes": [1, 3],
+        "info": "Percona Server for MySQL.",
+        "enabled": true,
+        "beta": false,
+        "types": [
+          { "code": "replication", "name": "Master / Replicas" },
+          { "code": "galera", "name": "Multi-Master" }
+        ]
+      },
+      {
+        "name": "Valkey",
+        "code": "valkey",
+        "version": "8",
+        "versions": ["8"],
+        "num_nodes": [1, 3],
+        "info": "Valkey is a Redis-compatible in-memory data store.",
+        "enabled": true,
+        "beta": false,
+        "types": [
+          { "code": "valkey_sentinel", "name": "Valkey Sentinel" }
+        ]
+      }
+    ],
+    "deployment_types_info": "Select a database type to deploy.",
+    "num_nodes_info": "Three nodes are recommended for high availability."
+  },
+  "cloud": {
+    "cloud_providers": [
+      {
+        "code": "elastx",
+        "name": "Elastx",
+        "full_name": "Elastx Cloud",
+        "type": "openstack",
+        "logo": "data:image/svg+xml;base64,abc",
+        "group": "elastx",
+        "regions": [
+          {
+            "code": "se-sto",
+            "display_code": "SE-STO",
+            "name": "Stockholm",
+            "country_code": "SE",
+            "continent_code": "EU",
+            "city": "Stockholm"
+          }
+        ]
+      },
+      {
+        "code": "aws",
+        "name": "AWS",
+        "full_name": "Amazon Web Services",
+        "type": "aws",
+        "logo": "data:image/svg+xml;base64,def",
+        "group": "aws",
+        "regions": [
+          {
+            "code": "eu-west-1",
+            "display_code": "EU-WEST-1",
+            "name": "Europe (Ireland)",
+            "country_code": "IE",
+            "continent_code": "EU",
+            "city": "Dublin"
+          },
+          {
+            "code": "us-east-1",
+            "display_code": "US-EAST-1",
+            "name": "US East (N. Virginia)",
+            "country_code": "US",
+            "continent_code": "NA",
+            "city": "N. Virginia"
+          }
+        ]
+      }
+    ],
+    "cloud_groups": [
+      { "name": "elastx", "label": "Elastx", "logo": "" },
+      { "name": "aws", "label": "AWS", "logo": "" }
+    ]
+  },
+  "instance": {
+    "instance_sizes": {
+      "elastx": [
+        { "name": "Tiny", "code": "tiny", "type": "v1-standard-1", "cpu": 1, "ram": 2, "price": 0.02 },
+        { "name": "Small", "code": "small", "type": "v1-standard-2", "cpu": 2, "ram": 4, "price": 0.04 },
+        { "name": "Medium", "code": "medium", "type": "v1-standard-4", "cpu": 4, "ram": 8, "price": 0.08 },
+        { "name": "Large", "code": "large", "type": "v1-standard-8", "cpu": 8, "ram": 16, "price": 0.16 }
+      ],
+      "aws": [
+        { "name": "Small", "code": "small", "type": "t3.medium", "cpu": 2, "ram": 4, "price": 0.05 },
+        { "name": "Medium", "code": "medium", "type": "m5.large", "cpu": 2, "ram": 8, "price": 0.10 },
+        { "name": "Large", "code": "large", "type": "m5.xlarge", "cpu": 4, "ram": 16, "price": 0.20 },
+        { "name": "X-Large", "code": "2x-large", "type": "m5.2xlarge", "cpu": 8, "ram": 32, "price": 0.40 }
+      ]
+    },
+    "instance_sizes_info": "Select an instance size.",
+    "volume_types": {
+      "elastx": [
+        { "name": "Dynamic SSD", "code": "v1-dynamic-100", "has_iops": false, "info": "SSD-backed", "price": 0.0001, "iops_price": 0 }
+      ],
+      "aws": [
+        { "name": "GP3", "code": "gp3", "has_iops": true, "info": "General Purpose SSD", "price": 0.08, "iops_price": 0.005 },
+        { "name": "GP2", "code": "gp2", "has_iops": false, "info": "General Purpose SSD (legacy)", "price": 0.10, "iops_price": 0 },
+        { "name": "IO1", "code": "io1", "has_iops": true, "info": "Provisioned IOPS SSD", "price": 0.125, "iops_price": 0.065 }
+      ]
+    },
+    "volume_types_info": "Select a volume type.",
+    "volume_sizes": {
+      "elastx": {
+        "v1-dynamic-100": { "min": 20, "max": 2000, "default": 80, "unit": "GiB" }
+      },
+      "aws": {
+        "gp3": { "min": 20, "max": 16000, "default": 100, "unit": "GiB" },
+        "gp2": { "min": 20, "max": 16000, "default": 100, "unit": "GiB" },
+        "io1": { "min": 20, "max": 16000, "default": 100, "unit": "GiB" }
+      }
+    },
+    "volume_sizes_info": "Volume size in GiB.",
+    "volume_iops": {
+      "aws": {
+        "gp3": { "min": 3000, "max": 16000, "max_per_gb": 500, "default": 3000 },
+        "io1": { "min": 100, "max": 64000, "max_per_gb": 50, "default": 3000 }
+      }
+    },
+    "volume_iops_info": "IOPS for provisioned volume types."
+  },
+  "network": {
+    "network": {
+      "elastx": [
+        {
+          "name": "Public",
+          "code": "public",
+          "info": "Public network access",
+          "enabled": true,
+          "ha_available": { "1": false, "3": true },
+          "vpc_available": false
+        }
+      ],
+      "aws": [
+        {
+          "name": "Public",
+          "code": "public",
+          "info": "Public network access",
+          "enabled": true,
+          "ha_available": { "1": false, "3": true },
+          "vpc_available": false
+        },
+        {
+          "name": "Private",
+          "code": "private",
+          "info": "Private VPC network",
+          "enabled": true,
+          "ha_available": { "1": false, "3": true },
+          "vpc_available": true
+        }
+      ]
+    },
+    "network_info": {
+      "elastx": "Network settings cannot be changed after deployment.",
+      "aws": "Network settings cannot be changed after deployment."
+    },
+    "type_info": {},
+    "vpc_info": {},
+    "availability_zones": {
+      "aws": {
+        "eu-west-1": [
+          { "code": "eu-west-1a", "name": "eu-west-1a" },
+          { "code": "eu-west-1b", "name": "eu-west-1b" },
+          { "code": "eu-west-1c", "name": "eu-west-1c" }
+        ]
+      }
+    }
+  }
+}

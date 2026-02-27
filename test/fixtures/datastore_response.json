@@ -1,0 +1,49 @@
+{
+  "uuid": "ds-12345-abcde",
+  "cluster_name": "test-postgres",
+  "cluster_status": "created",
+  "cluster_status_text": "Operational",
+  "cluster_type": "Postgres Streaming",
+  "cluster_type_name": "Master / Replicas",
+  "cluster_id": 42,
+  "cluster_size": 1,
+  "database_vendor": "postgres",
+  "database_version": "17",
+  "database_endpoint": "ds-12345-abcde.ccx.s9s-dev.net",
+  "cloud_provider": "elastx",
+  "region": {
+    "code": "se-sto",
+    "display_code": "SE-STO",
+    "name": "Stockholm"
+  },
+  "instance_size": "tiny",
+  "disk_size": 80,
+  "disk_type": "v1-dynamic-100",
+  "iops": null,
+  "operable": true,
+  "not_operable_reason": "",
+  "ssl_enabled": true,
+  "high_availability": false,
+  "tags": ["postgres", "17", "elastx"],
+  "azs": [],
+  "is_deploying": false,
+  "deploy_progress": 100,
+  "created_at": "2026-02-27T10:00:00Z",
+  "updated_at": "2026-02-27T10:05:00Z",
+  "seen_at": "2026-02-27T12:00:00Z",
+  "db_account": {
+    "database_username": "admin",
+    "database_password": "s3cret-pw-123",
+    "database_host": "ds-12345-abcde.ccx.s9s-dev.net",
+    "database_database": "mydb",
+    "database_privileges": "ALL"
+  },
+  "primary_url": "postgresql://admin:s3cret-pw-123@ds-12345-abcde.ccx.s9s-dev.net:5432/mydb",
+  "replica_url": "",
+  "notifications": {
+    "enabled": false,
+    "emails": []
+  },
+  "is_ca_available": true,
+  "current_job": null
+}
