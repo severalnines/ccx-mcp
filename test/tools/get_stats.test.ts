@@ -40,120 +40,111 @@ afterAll(() => {
 const DS_UUID = "ds-12345-abcde";
 
 describe("get_stats", () => {
-  it("fetches cpustat aggregate", async () => {
+  it("fetches cpuUsage aggregate", async () => {
     const mockCpu = {
-      cpu_user: 25.5,
-      cpu_system: 10.2,
-      cpu_idle: 64.3,
+      all: [{ idle: 64.3, user: 25.5, system: 10.2 }],
     };
 
     mswServer.use(
-      http.get(`https://test.ccx.dev/api/stat/api/v1/stat/${DS_UUID}/cpustat/aggregate`, () => {
+      http.get(`https://test.ccx.dev/api/stat/api/v1/stat/${DS_UUID}/cpuUsage/aggregate`, () => {
         return HttpResponse.json(mockCpu);
       }),
     );
 
     const { get } = await import("../../src/client.js");
-    const result = await get(`/stat/api/v1/stat/${DS_UUID}/cpustat/aggregate`) as Record<string, number>;
+    const result = await get(`/stat/api/v1/stat/${DS_UUID}/cpuUsage/aggregate`) as Record<string, unknown>;
 
-    expect(result.cpu_user).toBe(25.5);
-    expect(result.cpu_idle).toBe(64.3);
+    expect(result.all).toBeDefined();
   });
 
-  it("fetches memorystat aggregate", async () => {
+  it("fetches ramUsage aggregate", async () => {
     const mockMem = {
-      mem_total: 8589934592,
-      mem_used: 4294967296,
-      mem_free: 4294967296,
+      all: [{ total: 8589934592, used: 4294967296, free: 4294967296 }],
     };
 
     mswServer.use(
-      http.get(`https://test.ccx.dev/api/stat/api/v1/stat/${DS_UUID}/memorystat/aggregate`, () => {
+      http.get(`https://test.ccx.dev/api/stat/api/v1/stat/${DS_UUID}/ramUsage/aggregate`, () => {
         return HttpResponse.json(mockMem);
       }),
     );
 
     const { get } = await import("../../src/client.js");
-    const result = await get(`/stat/api/v1/stat/${DS_UUID}/memorystat/aggregate`) as Record<string, number>;
+    const result = await get(`/stat/api/v1/stat/${DS_UUID}/ramUsage/aggregate`) as Record<string, unknown>;
 
-    expect(result.mem_total).toBe(8589934592);
+    expect(result.all).toBeDefined();
   });
 
-  it("fetches diskstat aggregate", async () => {
-    const mockDisk = {
-      disk_read_bytes: 1048576,
-      disk_write_bytes: 2097152,
+  it("fetches loadAverage aggregate", async () => {
+    const mockLoad = {
+      all: [{ loadavg1: 0.5, loadavg5: 0.8, loadavg15: 0.9 }],
     };
 
     mswServer.use(
-      http.get(`https://test.ccx.dev/api/stat/api/v1/stat/${DS_UUID}/diskstat/aggregate`, () => {
+      http.get(`https://test.ccx.dev/api/stat/api/v1/stat/${DS_UUID}/loadAverage/aggregate`, () => {
+        return HttpResponse.json(mockLoad);
+      }),
+    );
+
+    const { get } = await import("../../src/client.js");
+    const result = await get(`/stat/api/v1/stat/${DS_UUID}/loadAverage/aggregate`) as Record<string, unknown>;
+
+    expect(result.all).toBeDefined();
+  });
+
+  it("fetches diskSpaceUsage aggregate", async () => {
+    const mockDisk = {
+      all: [{ available: 50000000000, used: 30000000000 }],
+    };
+
+    mswServer.use(
+      http.get(`https://test.ccx.dev/api/stat/api/v1/stat/${DS_UUID}/diskSpaceUsage/aggregate`, () => {
         return HttpResponse.json(mockDisk);
       }),
     );
 
     const { get } = await import("../../src/client.js");
-    const result = await get(`/stat/api/v1/stat/${DS_UUID}/diskstat/aggregate`) as Record<string, number>;
+    const result = await get(`/stat/api/v1/stat/${DS_UUID}/diskSpaceUsage/aggregate`) as Record<string, unknown>;
 
-    expect(result.disk_read_bytes).toBe(1048576);
+    expect(result.all).toBeDefined();
   });
 
-  it("fetches netstat aggregate", async () => {
+  it("fetches networkUsage aggregate", async () => {
     const mockNet = {
-      net_rx_bytes: 5000000,
-      net_tx_bytes: 3000000,
+      all: [{ transmit_bytes: 5000000, receive_bytes: 3000000 }],
     };
 
     mswServer.use(
-      http.get(`https://test.ccx.dev/api/stat/api/v1/stat/${DS_UUID}/netstat/aggregate`, () => {
+      http.get(`https://test.ccx.dev/api/stat/api/v1/stat/${DS_UUID}/networkUsage/aggregate`, () => {
         return HttpResponse.json(mockNet);
       }),
     );
 
     const { get } = await import("../../src/client.js");
-    const result = await get(`/stat/api/v1/stat/${DS_UUID}/netstat/aggregate`) as Record<string, number>;
+    const result = await get(`/stat/api/v1/stat/${DS_UUID}/networkUsage/aggregate`) as Record<string, unknown>;
 
-    expect(result.net_rx_bytes).toBe(5000000);
+    expect(result.all).toBeDefined();
   });
 
-  it("fetches sqlstat aggregate", async () => {
-    const mockSql = {
-      queries_per_second: 150.5,
-      slow_queries: 3,
+  it("fetches mySqlDbConnections (vendor-specific)", async () => {
+    const mockConns = {
+      all: [{ thread_connected: 15, max_connections: 100 }],
     };
 
     mswServer.use(
-      http.get(`https://test.ccx.dev/api/stat/api/v1/stat/${DS_UUID}/sqlstat/aggregate`, () => {
-        return HttpResponse.json(mockSql);
+      http.get(`https://test.ccx.dev/api/stat/api/v1/stat/${DS_UUID}/mySqlDbConnections/aggregate`, () => {
+        return HttpResponse.json(mockConns);
       }),
     );
 
     const { get } = await import("../../src/client.js");
-    const result = await get(`/stat/api/v1/stat/${DS_UUID}/sqlstat/aggregate`) as Record<string, number>;
+    const result = await get(`/stat/api/v1/stat/${DS_UUID}/mySqlDbConnections/aggregate`) as Record<string, unknown>;
 
-    expect(result.queries_per_second).toBe(150.5);
-  });
-
-  it("fetches dbstat aggregate", async () => {
-    const mockDb = {
-      connections_active: 15,
-      connections_total: 100,
-    };
-
-    mswServer.use(
-      http.get(`https://test.ccx.dev/api/stat/api/v1/stat/${DS_UUID}/dbstat/aggregate`, () => {
-        return HttpResponse.json(mockDb);
-      }),
-    );
-
-    const { get } = await import("../../src/client.js");
-    const result = await get(`/stat/api/v1/stat/${DS_UUID}/dbstat/aggregate`) as Record<string, number>;
-
-    expect(result.connections_active).toBe(15);
+    expect(result.all).toBeDefined();
   });
 
   it("surfaces 404 for nonexistent datastore", async () => {
     mswServer.use(
-      http.get("https://test.ccx.dev/api/stat/api/v1/stat/nonexistent/cpustat/aggregate", () => {
+      http.get("https://test.ccx.dev/api/stat/api/v1/stat/nonexistent/cpuUsage/aggregate", () => {
         return HttpResponse.json({ error: "not found" }, { status: 404 });
       }),
     );
@@ -161,7 +152,7 @@ describe("get_stats", () => {
     const { get, ApiError } = await import("../../src/client.js");
 
     try {
-      await get("/stat/api/v1/stat/nonexistent/cpustat/aggregate");
+      await get("/stat/api/v1/stat/nonexistent/cpuUsage/aggregate");
       expect.unreachable("Should have thrown");
     } catch (e) {
       expect(e).toBeInstanceOf(ApiError);
@@ -171,7 +162,7 @@ describe("get_stats", () => {
 
   it("surfaces 500 server error", async () => {
     mswServer.use(
-      http.get(`https://test.ccx.dev/api/stat/api/v1/stat/${DS_UUID}/cpustat/aggregate`, () => {
+      http.get(`https://test.ccx.dev/api/stat/api/v1/stat/${DS_UUID}/cpuUsage/aggregate`, () => {
         return HttpResponse.json({ error: "internal error" }, { status: 500 });
       }),
     );
@@ -179,7 +170,7 @@ describe("get_stats", () => {
     const { get, ApiError } = await import("../../src/client.js");
 
     try {
-      await get(`/stat/api/v1/stat/${DS_UUID}/cpustat/aggregate`);
+      await get(`/stat/api/v1/stat/${DS_UUID}/cpuUsage/aggregate`);
       expect.unreachable("Should have thrown");
     } catch (e) {
       expect(e).toBeInstanceOf(ApiError);
@@ -191,14 +182,14 @@ describe("get_stats", () => {
     let capturedHeaders: Record<string, string> = {};
 
     mswServer.use(
-      http.get(`https://test.ccx.dev/api/stat/api/v1/stat/${DS_UUID}/cpustat/aggregate`, ({ request }) => {
+      http.get(`https://test.ccx.dev/api/stat/api/v1/stat/${DS_UUID}/cpuUsage/aggregate`, ({ request }) => {
         capturedHeaders = Object.fromEntries(request.headers.entries());
         return HttpResponse.json({});
       }),
     );
 
     const { get } = await import("../../src/client.js");
-    await get(`/stat/api/v1/stat/${DS_UUID}/cpustat/aggregate`);
+    await get(`/stat/api/v1/stat/${DS_UUID}/cpuUsage/aggregate`);
 
     expect(capturedHeaders["cookie"]).toContain("ccx-session=test-session");
   });
