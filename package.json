@@ -1,13 +1,36 @@
 {
   "name": "@severalnines/ccx-mcp",
   "version": "0.1.0",
-  "description": "MCP server for managing CCX database clusters",
+  "description": "MCP server for managing CCX database clusters via AI assistants",
   "type": "module",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/severalnines/ccx-backend.git",
+    "directory": "mcp"
+  },
+  "homepage": "https://github.com/severalnines/ccx-backend/tree/main/mcp#readme",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ccx",
+    "database",
+    "postgres",
+    "mysql",
+    "mariadb",
+    "redis",
+    "valkey",
+    "severalnines"
+  ],
   "bin": {
     "ccx-mcp": "./build/index.js"
   },
+  "files": [
+    "build"
+  ],
   "scripts": {
     "build": "tsc && chmod 755 build/index.js",
+    "prepublishOnly": "npm run build",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -20,5 +43,8 @@
     "msw": "^2.7.3",
     "typescript": "^5.8.3",
     "vitest": "^3.1.1"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
