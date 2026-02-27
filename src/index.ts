@@ -26,6 +26,7 @@ import { register as registerListBackups } from "./tools/list_backups.js";
 import { register as registerRestoreBackup } from "./tools/restore_backup.js";
 import { register as registerGetTopQueries } from "./tools/get_top_queries.js";
 import { register as registerGetStats } from "./tools/get_stats.js";
+import { register as registerAddNode } from "./tools/add_node.js";
 
 async function main() {
   // Validate env vars
@@ -82,6 +83,7 @@ async function main() {
   registerRestoreBackup(server);
   registerGetTopQueries(server);
   registerGetStats(server);
+  registerAddNode(server);
 
   // Start stdio transport
   const transport = new StdioServerTransport();
