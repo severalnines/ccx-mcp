@@ -4,6 +4,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { login } from "./auth.js";
 import { load as loadWizard } from "./wizard.js";
+import { isProtected } from "./protect.js";
 
 import { register as registerListClouds } from "./tools/list_clouds.js";
 import { register as registerListPlans } from "./tools/list_plans.js";
@@ -59,6 +60,9 @@ async function main() {
   await login();
   process.stderr.write("CCX MCP: Loading deployment wizard...\n");
   await loadWizard();
+  process.stderr.write(
+    `CCX MCP: Protection mode: ${isProtected() ? "ON" : "OFF"}\n`,
+  );
   process.stderr.write("CCX MCP: Ready.\n");
 
   // Register tools

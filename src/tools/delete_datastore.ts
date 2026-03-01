@@ -1,11 +1,12 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { del } from "../client.js";
+import { isProtected, protectedError } from "../protect.js";
 
 export function register(server: McpServer) {
   server.tool(
     "ccx_delete_datastore",
-    "Delete a CCX datastore. This is DESTRUCTIVE and cannot be undone. You must set confirm to true.",
+    "Delete a CCX datastore. This is DESTRUCTIVE and cannot be undone. You must set confirm to true. Blocked by protection mode (CCX_PROTECT) by default.",
     {
       datastore_uuid: z
         .string()
@@ -15,6 +16,8 @@ export function register(server: McpServer) {
         .describe("Must be explicitly set to true to confirm deletion"),
     },
     async ({ datastore_uuid, confirm }) => {
+      if (isProtected()) return protectedError("Delete datastore");
+
       if (!confirm) {
         return {
           content: [

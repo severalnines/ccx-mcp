@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
+import { isProtected, protectedError } from "../../src/protect.js";
 
 const mswServer = setupServer(
   http.post("https://test.ccx.dev/api/v2/auth/login", () => {
@@ -38,6 +39,26 @@ afterAll(() => {
 });
 
 const DS_UUID = "ds-12345-abcde";
+
+describe("delete_db_user protection mode", () => {
+  afterEach(() => {
+    delete process.env.CCX_PROTECT;
+  });
+
+  it("blocks operation when protection mode is on (default)", async () => {
+    delete process.env.CCX_PROTECT;
+    expect(isProtected()).toBe(true);
+    const result = protectedError("Delete database user");
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain("Delete database user");
+    expect(result.content[0].text).toContain("BLOCKED");
+  });
+
+  it("allows operation when CCX_PROTECT=false", () => {
+    process.env.CCX_PROTECT = "false";
+    expect(isProtected()).toBe(false);
+  });
+});
 
 describe("delete_db_user", () => {
   it("sends DELETE with username and default host", async () => {

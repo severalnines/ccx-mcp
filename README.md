@@ -4,7 +4,9 @@ MCP (Model Context Protocol) server for managing [CCX](https://severalnines.com/
 
 ## Quick Start
 
-Add this to your MCP client configuration (e.g. `.mcp.json` for Claude Code):
+### Install from npm
+
+Add this to your MCP client configuration:
 
 ```json
 {
@@ -21,6 +23,68 @@ Add this to your MCP client configuration (e.g. `.mcp.json` for Claude Code):
   }
 }
 ```
+
+### Install from source
+
+```bash
+git clone https://github.com/severalnines/ccx-mcp.git
+cd ccx-mcp
+npm install
+npm run build
+```
+
+Then point your MCP client to the built server:
+
+```json
+{
+  "mcpServers": {
+    "ccx": {
+      "command": "node",
+      "args": ["/absolute/path/to/ccx-mcp/build/index.js"],
+      "env": {
+        "CCX_BASE_URL": "https://app.myccx.io",
+        "CCX_USERNAME": "your-email@example.com",
+        "CCX_PASSWORD": "your-password"
+      }
+    }
+  }
+}
+```
+
+### Where to put the configuration
+
+| MCP Client | Config file |
+|------------|-------------|
+| Claude Code | `.mcp.json` in your project root, or `~/.claude/.mcp.json` for global |
+| Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) |
+| Cursor | `.cursor/mcp.json` in your project root |
+| Windsurf | `~/.codeium/windsurf/mcp_config.json` |
+
+### `CCX_BASE_URL`
+
+This is the URL of your CCX deployment. If you're using the hosted CCX service, it's typically `https://app.myccx.io`. If you're running a self-hosted CCX instance, use its URL instead.
+
+### Using OAuth2 instead of password
+
+Replace `CCX_USERNAME` and `CCX_PASSWORD` with `CCX_CLIENT_ID` and `CCX_CLIENT_SECRET`:
+
+```json
+{
+  "mcpServers": {
+    "ccx": {
+      "command": "npx",
+      "args": ["-y", "@severalnines/ccx-mcp"],
+      "env": {
+        "CCX_BASE_URL": "https://app.myccx.io",
+        "CCX_CLIENT_ID": "your-client-id",
+        "CCX_CLIENT_SECRET": "your-client-secret"
+      }
+    }
+  }
+}
+```
+
+You can create OAuth2 credentials in the CCX UI under **Account > Security**.
 
 Then ask your AI assistant things like:
 
@@ -77,6 +141,7 @@ For programmatic or CI/CD use, set `CCX_CLIENT_ID` and `CCX_CLIENT_SECRET` inste
 | `ccx_get_nodes` | Get cluster nodes with roles, status, and IP addresses |
 | `ccx_get_connection_string` | Connection strings in URI, CLI, JDBC, and env formats |
 | `ccx_scale_datastore` | Scale instance size (CPU/RAM) or expand storage volume |
+| `ccx_add_node` | Add a new replica node to a cluster |
 
 ### Cloud & Plans
 

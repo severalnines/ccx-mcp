@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
+import { isProtected, protectedError } from "../../src/protect.js";
 
 const mswServer = setupServer(
   http.post("https://test.ccx.dev/api/v2/auth/login", () => {
@@ -39,6 +40,26 @@ afterAll(() => {
 
 const DS_UUID = "ds-12345-abcde";
 const BACKUP_ID = "backup-001";
+
+describe("restore_backup protection mode", () => {
+  afterEach(() => {
+    delete process.env.CCX_PROTECT;
+  });
+
+  it("blocks operation when protection mode is on (default)", async () => {
+    delete process.env.CCX_PROTECT;
+    expect(isProtected()).toBe(true);
+    const result = protectedError("Restore backup");
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain("Restore backup");
+    expect(result.content[0].text).toContain("BLOCKED");
+  });
+
+  it("allows operation when CCX_PROTECT=false", () => {
+    process.env.CCX_PROTECT = "false";
+    expect(isProtected()).toBe(false);
+  });
+});
 
 describe("restore_backup", () => {
   it("sends POST to restore endpoint", async () => {
