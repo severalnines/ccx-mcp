@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import wizardFixture from "./fixtures/wizard_response.json";
@@ -22,19 +22,21 @@ beforeAll(async () => {
   process.env.CCX_BASE_URL = "https://test.ccx.dev";
   process.env.CCX_USERNAME = "test@test.com";
   process.env.CCX_PASSWORD = "testpass";
+  delete process.env.CCX_CLIENT_ID;
 
   // Dynamic import after env vars are set
   const auth = await import("../src/auth.js");
+  auth.clearSession();
   await auth.login();
   const wizard = await import("../src/wizard.js");
   await wizard.load();
+});
 
-  return () => {
-    mswServer.close();
-    delete process.env.CCX_BASE_URL;
-    delete process.env.CCX_USERNAME;
-    delete process.env.CCX_PASSWORD;
-  };
+afterAll(() => {
+  mswServer.close();
+  delete process.env.CCX_BASE_URL;
+  delete process.env.CCX_USERNAME;
+  delete process.env.CCX_PASSWORD;
 });
 
 describe("wizard smart defaults", () => {

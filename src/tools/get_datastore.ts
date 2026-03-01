@@ -44,8 +44,9 @@ export function register(server: McpServer) {
             ? {
                 host: store.db_account.database_host,
                 username: store.db_account.database_username,
-                password: store.db_account.database_password,
+                password: "********",
                 database: store.db_account.database_database,
+                note: "Password redacted. Use ccx_get_connection_string to get full connection details.",
               }
             : null,
           current_job: store.current_job

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
+import { validateUsername } from "../../src/validate.js";
 
 const mswServer = setupServer(
   http.post("https://test.ccx.dev/api/v2/auth/login", () => {
@@ -25,12 +26,6 @@ beforeAll(async () => {
   auth.clearSession();
   await auth.login();
 
-  return () => {
-    mswServer.close();
-    delete process.env.CCX_BASE_URL;
-    delete process.env.CCX_USERNAME;
-    delete process.env.CCX_PASSWORD;
-  };
 });
 
 afterAll(() => {
@@ -172,6 +167,16 @@ describe("create_db_user", () => {
       database_host: "192.168.1.0/24",
       create_admin_user: false,
     });
+  });
+
+  it("rejects reserved username", () => {
+    const err = validateUsername("root");
+    expect(err).toContain("reserved");
+  });
+
+  it("rejects empty username", () => {
+    const err = validateUsername("");
+    expect(err).toContain("cannot be empty");
   });
 
   it("sends correct auth headers", async () => {

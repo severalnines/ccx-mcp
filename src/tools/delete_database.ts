@@ -1,22 +1,24 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { post } from "../client.js";
-import type { DbDatabase } from "../types.js";
+import { del } from "../client.js";
+import { isProtected, protectedError } from "../protect.js";
 import { validateDatabaseName } from "../validate.js";
 
 export function register(server: McpServer) {
   server.tool(
-    "ccx_create_database",
-    "Create a new database on a CCX datastore",
+    "ccx_delete_database",
+    "Delete a database from a CCX datastore. This is DESTRUCTIVE and cannot be undone. Blocked by protection mode (CCX_PROTECT) by default.",
     {
       datastore_uuid: z
         .string()
         .describe("UUID of the datastore"),
       database_name: z
         .string()
-        .describe("Name for the new database"),
+        .describe("Name of the database to delete"),
     },
     async ({ datastore_uuid, database_name }) => {
+      if (isProtected()) return protectedError("Delete database");
+
       const validationError = validateDatabaseName(database_name);
       if (validationError) {
         return {
@@ -31,16 +33,25 @@ export function register(server: McpServer) {
       }
 
       try {
-        const result = await post(
+        await del(
           `/userdb/api/v1/database/${datastore_uuid}`,
           { database_name },
-        ) as DbDatabase;
+        );
 
         return {
           content: [
             {
               type: "text" as const,
-              text: JSON.stringify(result, null, 2),
+              text: JSON.stringify(
+                {
+                  status: "deleted",
+                  datastore_uuid,
+                  database_name,
+                  message: "Database deleted successfully.",
+                },
+                null,
+                2,
+              ),
             },
           ],
         };
@@ -49,7 +60,7 @@ export function register(server: McpServer) {
           content: [
             {
               type: "text" as const,
-              text: `Error creating database: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error deleting database: ${error instanceof Error ? error.message : String(error)}`,
             },
           ],
           isError: true,

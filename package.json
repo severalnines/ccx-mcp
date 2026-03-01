@@ -1,14 +1,15 @@
 {
   "name": "@severalnines/ccx-mcp",
-  "version": "0.1.2",
+  "version": "0.1.0",
   "description": "MCP server for managing CCX database clusters via AI assistants",
   "type": "module",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/severalnines/ccx-mcp.git"
+    "url": "https://github.com/severalnines/ccx-backend.git",
+    "directory": "mcp"
   },
-  "homepage": "https://github.com/severalnines/ccx-mcp#readme",
+  "homepage": "https://github.com/severalnines/ccx-backend/tree/main/mcp#readme",
   "keywords": [
     "mcp",
     "model-context-protocol",

@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { post } from "../client.js";
 import type { CreateDbUserRequest, DbUser } from "../types.js";
+import { validateUsername } from "../validate.js";
 
 export function register(server: McpServer) {
   server.tool(
@@ -35,6 +36,19 @@ export function register(server: McpServer) {
         .describe("Create as admin user with elevated privileges"),
     },
     async ({ datastore_uuid, username, password, database, privileges, host, admin }) => {
+      const validationError = validateUsername(username);
+      if (validationError) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: `Invalid username: ${validationError}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
       try {
         const body: CreateDbUserRequest = {
           database_username: username,

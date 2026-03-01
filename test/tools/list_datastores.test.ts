@@ -25,13 +25,6 @@ beforeAll(async () => {
   const auth = await import("../../src/auth.js");
   auth.clearSession();
   await auth.login();
-
-  return () => {
-    mswServer.close();
-    delete process.env.CCX_BASE_URL;
-    delete process.env.CCX_USERNAME;
-    delete process.env.CCX_PASSWORD;
-  };
 });
 
 afterAll(() => {

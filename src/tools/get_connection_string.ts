@@ -11,6 +11,37 @@ interface ConnOverrides {
   database?: string;
 }
 
+const DEFAULT_PORTS: Record<string, number> = {
+  postgres: 5432,
+  mysql: 3306,
+  redis: 6379,
+  mssql: 1433,
+};
+
+function parseHostPort(
+  primaryUrl: string | undefined,
+  fallbackHost: string,
+  defaultPort: number,
+): { host: string; port: number } {
+  if (primaryUrl) {
+    try {
+      const url = new URL(primaryUrl);
+      return {
+        host: url.hostname,
+        port: url.port ? Number(url.port) : defaultPort,
+      };
+    } catch {
+      // Not a URL, treat as bare hostname
+      return { host: primaryUrl, port: defaultPort };
+    }
+  }
+  return { host: fallbackHost, port: defaultPort };
+}
+
+function shellEscape(s: string): string {
+  return "'" + s.replace(/'/g, "'\\''") + "'";
+}
+
 function buildConnectionStrings(
   store: DatastoreInfo,
   overrides?: ConnOverrides,
@@ -20,21 +51,20 @@ function buildConnectionStrings(
     return { error: "Credentials not yet available. The datastore may still be deploying." };
   }
 
-  const host = store.primary_url || creds.database_host;
   const user = overrides?.username ?? creds.database_username;
   const pass = overrides?.password ?? creds.database_password;
   const db = overrides?.database ?? creds.database_database;
   const vendor = store.database_vendor?.toLowerCase() ?? "";
-  const ssl = store.ssl_enabled ? "?sslmode=require" : "";
 
   const encodedPass = encodeURIComponent(pass);
 
   const strings: Record<string, string> = {};
 
   if (vendor.includes("postgres") || vendor.includes("pgsql")) {
-    const port = 5432;
+    const { host, port } = parseHostPort(store.primary_url, creds.database_host, DEFAULT_PORTS.postgres);
+    const ssl = store.ssl_enabled ? "?sslmode=require" : "";
     strings.uri = `postgresql://${user}:${encodedPass}@${host}:${port}/${db}${ssl}`;
-    strings.psql = `psql "host=${host} port=${port} dbname=${db} user=${user} password=${pass}${store.ssl_enabled ? " sslmode=require" : ""}"`;
+    strings.psql = `PGPASSWORD=${shellEscape(pass)} psql -h ${host} -p ${port} -U ${user} -d ${db}${store.ssl_enabled ? " --set=sslmode=require" : ""}`;
     strings.jdbc = `jdbc:postgresql://${host}:${port}/${db}${ssl}`;
     strings.env = [
       `DATABASE_URL=postgresql://${user}:${encodedPass}@${host}:${port}/${db}${ssl}`,
@@ -49,10 +79,10 @@ function buildConnectionStrings(
     vendor.includes("mysql") ||
     vendor.includes("percona")
   ) {
-    const port = 3306;
+    const { host, port } = parseHostPort(store.primary_url, creds.database_host, DEFAULT_PORTS.mysql);
     const mysqlSsl = store.ssl_enabled ? "?ssl-mode=REQUIRED" : "";
     strings.uri = `mysql://${user}:${encodedPass}@${host}:${port}/${db}${mysqlSsl}`;
-    strings.mysql = `mysql -h ${host} -P ${port} -u ${user} -p'${pass}' ${db}${store.ssl_enabled ? " --ssl-mode=REQUIRED" : ""}`;
+    strings.mysql = `mysql -h ${host} -P ${port} -u ${user} -p${shellEscape(pass)} ${db}${store.ssl_enabled ? " --ssl-mode=REQUIRED" : ""}`;
     strings.jdbc = `jdbc:mysql://${host}:${port}/${db}${mysqlSsl}`;
     strings.env = [
       `DATABASE_URL=mysql://${user}:${encodedPass}@${host}:${port}/${db}${mysqlSsl}`,
@@ -63,9 +93,9 @@ function buildConnectionStrings(
       `MYSQL_DATABASE=${db}`,
     ].join("\n");
   } else if (vendor.includes("redis") || vendor.includes("valkey")) {
-    const port = 6379;
+    const { host, port } = parseHostPort(store.primary_url, creds.database_host, DEFAULT_PORTS.redis);
     strings.uri = `redis://${pass ? `:${encodedPass}@` : ""}${host}:${port}`;
-    strings.redis = `redis-cli -h ${host} -p ${port}${pass ? ` -a '${pass}'` : ""}${store.ssl_enabled ? " --tls" : ""}`;
+    strings.redis = `redis-cli -h ${host} -p ${port}${pass ? ` -a ${shellEscape(pass)}` : ""}${store.ssl_enabled ? " --tls" : ""}`;
     strings.env = [
       `REDIS_URL=redis://${pass ? `:${encodedPass}@` : ""}${host}:${port}`,
       `REDIS_HOST=${host}`,
@@ -73,9 +103,9 @@ function buildConnectionStrings(
       ...(pass ? [`REDIS_PASSWORD=${pass}`] : []),
     ].join("\n");
   } else if (vendor.includes("microsoft") || vendor.includes("mssql")) {
-    const port = 1433;
+    const { host, port } = parseHostPort(store.primary_url, creds.database_host, DEFAULT_PORTS.mssql);
     strings.uri = `mssql://${user}:${encodedPass}@${host}:${port}/${db}`;
-    strings.jdbc = `jdbc:sqlserver://${host}:${port};databaseName=${db};user=${user};password=${pass}${store.ssl_enabled ? ";encrypt=true" : ""}`;
+    strings.jdbc = `jdbc:sqlserver://${host}:${port};databaseName=${db};user=${user};password=${shellEscape(pass)}${store.ssl_enabled ? ";encrypt=true" : ""}`;
     strings.env = [
       `DATABASE_URL=mssql://${user}:${encodedPass}@${host}:${port}/${db}`,
       `MSSQL_HOST=${host}`,
@@ -84,6 +114,10 @@ function buildConnectionStrings(
       `MSSQL_PASSWORD=${pass}`,
       `MSSQL_DATABASE=${db}`,
     ].join("\n");
+  } else {
+    return {
+      error: `Unsupported database vendor '${store.database_vendor}'. Supported: PostgreSQL, MySQL/MariaDB/Percona, Redis/Valkey, Microsoft SQL Server.`,
+    };
   }
 
   return strings;
@@ -106,11 +140,11 @@ export function register(server: McpServer) {
       username: z
         .string()
         .optional()
-        .describe("Database username. Defaults to the admin user (ccxadmin)."),
+        .describe("Database username. Defaults to the datastore's primary user from db_account."),
       password: z
         .string()
         .optional()
-        .describe("Database password. Defaults to the admin user's password."),
+        .describe("Database password. Defaults to the datastore's primary user password from db_account."),
       database: z
         .string()
         .optional()

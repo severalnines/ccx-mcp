@@ -34,17 +34,17 @@ afterAll(() => {
 
 const DS_UUID = "ds-12345-abcde";
 
-describe("delete_firewall_rule protection mode", () => {
+describe("delete_database protection mode", () => {
   afterEach(() => {
     delete process.env.CCX_PROTECT;
   });
 
-  it("blocks operation when protection mode is on (default)", async () => {
+  it("blocks operation when protection mode is on (default)", () => {
     delete process.env.CCX_PROTECT;
     expect(isProtected()).toBe(true);
-    const result = protectedError("Delete firewall rule");
+    const result = protectedError("Delete database");
     expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain("Delete firewall rule");
+    expect(result.content[0].text).toContain("Delete database");
     expect(result.content[0].text).toContain("BLOCKED");
   });
 
@@ -54,50 +54,34 @@ describe("delete_firewall_rule protection mode", () => {
   });
 });
 
-describe("delete_firewall_rule", () => {
-  it("sends DELETE with source in body", async () => {
+describe("delete_database", () => {
+  it("calls DELETE with correct body", async () => {
     let capturedBody: Record<string, unknown> = {};
 
     mswServer.use(
-      http.delete(`https://test.ccx.dev/api/firewall/api/v1/firewall/${DS_UUID}`, async ({ request }) => {
+      http.delete(`https://test.ccx.dev/api/userdb/api/v1/database/${DS_UUID}`, async ({ request }) => {
         capturedBody = (await request.json()) as Record<string, unknown>;
         return HttpResponse.json({}, { status: 200 });
       }),
     );
 
     const { del } = await import("../../src/client.js");
-    await del(`/firewall/api/v1/firewall/${DS_UUID}`, { source: "10.0.0.0/24" });
+    await del(`/userdb/api/v1/database/${DS_UUID}`, { database_name: "myapp" });
 
-    expect(capturedBody).toEqual({ source: "10.0.0.0/24" });
+    expect(capturedBody).toEqual({ database_name: "myapp" });
   });
 
-  it("deletes rule for single IP", async () => {
-    let capturedBody: Record<string, unknown> = {};
-
+  it("surfaces 404 for nonexistent database", async () => {
     mswServer.use(
-      http.delete(`https://test.ccx.dev/api/firewall/api/v1/firewall/${DS_UUID}`, async ({ request }) => {
-        capturedBody = (await request.json()) as Record<string, unknown>;
-        return HttpResponse.json({}, { status: 200 });
-      }),
-    );
-
-    const { del } = await import("../../src/client.js");
-    await del(`/firewall/api/v1/firewall/${DS_UUID}`, { source: "1.2.3.4/32" });
-
-    expect(capturedBody.source).toBe("1.2.3.4/32");
-  });
-
-  it("surfaces 404 for nonexistent rule", async () => {
-    mswServer.use(
-      http.delete(`https://test.ccx.dev/api/firewall/api/v1/firewall/${DS_UUID}`, () => {
-        return HttpResponse.json({ error: "not found" }, { status: 404 });
+      http.delete(`https://test.ccx.dev/api/userdb/api/v1/database/${DS_UUID}`, () => {
+        return HttpResponse.json({ error: "database not found" }, { status: 404 });
       }),
     );
 
     const { del, ApiError } = await import("../../src/client.js");
 
     try {
-      await del(`/firewall/api/v1/firewall/${DS_UUID}`, { source: "99.99.99.99/32" });
+      await del(`/userdb/api/v1/database/${DS_UUID}`, { database_name: "nonexistent" });
       expect.unreachable("Should have thrown");
     } catch (e) {
       expect(e).toBeInstanceOf(ApiError);
@@ -107,7 +91,7 @@ describe("delete_firewall_rule", () => {
 
   it("surfaces 500 server error", async () => {
     mswServer.use(
-      http.delete(`https://test.ccx.dev/api/firewall/api/v1/firewall/${DS_UUID}`, () => {
+      http.delete(`https://test.ccx.dev/api/userdb/api/v1/database/${DS_UUID}`, () => {
         return HttpResponse.json({ error: "internal error" }, { status: 500 });
       }),
     );
@@ -115,28 +99,11 @@ describe("delete_firewall_rule", () => {
     const { del, ApiError } = await import("../../src/client.js");
 
     try {
-      await del(`/firewall/api/v1/firewall/${DS_UUID}`, { source: "10.0.0.0/24" });
+      await del(`/userdb/api/v1/database/${DS_UUID}`, { database_name: "myapp" });
       expect.unreachable("Should have thrown");
     } catch (e) {
       expect(e).toBeInstanceOf(ApiError);
       expect((e as InstanceType<typeof ApiError>).status).toBe(500);
     }
-  });
-
-  it("sends correct auth headers", async () => {
-    let capturedHeaders: Record<string, string> = {};
-
-    mswServer.use(
-      http.delete(`https://test.ccx.dev/api/firewall/api/v1/firewall/${DS_UUID}`, ({ request }) => {
-        capturedHeaders = Object.fromEntries(request.headers.entries());
-        return HttpResponse.json({}, { status: 200 });
-      }),
-    );
-
-    const { del } = await import("../../src/client.js");
-    await del(`/firewall/api/v1/firewall/${DS_UUID}`, { source: "10.0.0.0/24" });
-
-    expect(capturedHeaders["cookie"]).toContain("ccx-session=test-session");
-    expect(capturedHeaders["content-type"]).toContain("application/json");
   });
 });

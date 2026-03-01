@@ -18,7 +18,7 @@ export interface LoginResponse {
 export interface Scope {
   id: string;
   name: string;
-  type: string; // "user" | "org"
+  type: "user" | "org";
   role: string;
 }
 
@@ -235,8 +235,12 @@ export interface DatastoreInfo {
 }
 
 export interface DatastoreListResponse {
-  total: number;
-  datastores: DatastoreInfo[];
+  pagination: {
+    page: number;
+    per_page: number;
+    total: number;
+  };
+  data_stores: DatastoreInfo[];
 }
 
 // ── Database Users ──

@@ -6,7 +6,7 @@ import { isProtected, protectedError } from "../protect.js";
 export function register(server: McpServer) {
   server.tool(
     "ccx_delete_db_user",
-    "Delete a database user from a CCX datastore. Use ccx_list_db_users first to see existing users and their host restrictions. Blocked by protection mode (CCX_PROTECT) by default.",
+    "Delete a database user from a CCX datastore. This is DESTRUCTIVE and may break applications using this user. You must set confirm to true. Use ccx_list_db_users first to see existing users and their host restrictions. Blocked by protection mode (CCX_PROTECT) by default.",
     {
       datastore_uuid: z
         .string()
@@ -18,9 +18,24 @@ export function register(server: McpServer) {
         .string()
         .optional()
         .describe("Host restriction of the user to delete (e.g. '%' or 'localhost'). Defaults to '%'."),
+      confirm: z
+        .boolean()
+        .describe("Must be explicitly set to true to confirm deletion"),
     },
-    async ({ datastore_uuid, username, host }) => {
+    async ({ datastore_uuid, username, host, confirm }) => {
       if (isProtected()) return protectedError("Delete database user");
+
+      if (!confirm) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: "Deletion aborted: 'confirm' must be explicitly set to true. Deleting a database user may break applications that rely on these credentials.",
+            },
+          ],
+          isError: true,
+        };
+      }
 
       try {
         await del(

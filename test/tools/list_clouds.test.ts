@@ -31,12 +31,6 @@ beforeAll(async () => {
   const wizard = await import("../../src/wizard.js");
   await wizard.load();
 
-  return () => {
-    mswServer.close();
-    delete process.env.CCX_BASE_URL;
-    delete process.env.CCX_USERNAME;
-    delete process.env.CCX_PASSWORD;
-  };
 });
 
 afterAll(() => {

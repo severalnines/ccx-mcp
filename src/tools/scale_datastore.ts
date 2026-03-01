@@ -20,7 +20,7 @@ export function register(server: McpServer) {
         .describe("New volume size in GiB. Must be larger than the current size (storage can only grow)."),
     },
     async ({ datastore_uuid, new_instance_size, new_volume_size }) => {
-      if (!new_instance_size && !new_volume_size) {
+      if (new_instance_size === undefined && new_volume_size === undefined) {
         return {
           content: [
             {
@@ -34,8 +34,8 @@ export function register(server: McpServer) {
 
       try {
         const body: Record<string, unknown> = {};
-        if (new_instance_size) body.new_instance_size = new_instance_size;
-        if (new_volume_size) body.new_volume_size = new_volume_size;
+        if (new_instance_size !== undefined) body.new_instance_size = new_instance_size;
+        if (new_volume_size !== undefined) body.new_volume_size = new_volume_size;
 
         await patch(
           `/prov/api/v2/cluster/${datastore_uuid}`,
@@ -43,8 +43,8 @@ export function register(server: McpServer) {
         );
 
         const changes = [];
-        if (new_instance_size) changes.push(`instance → ${new_instance_size}`);
-        if (new_volume_size) changes.push(`volume → ${new_volume_size} GiB`);
+        if (new_instance_size !== undefined) changes.push(`instance → ${new_instance_size}`);
+        if (new_volume_size !== undefined) changes.push(`volume → ${new_volume_size} GiB`);
 
         return {
           content: [

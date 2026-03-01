@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
+import { validateDatabaseName } from "../../src/validate.js";
 
 const mswServer = setupServer(
   http.post("https://test.ccx.dev/api/v2/auth/login", () => {
@@ -25,12 +26,6 @@ beforeAll(async () => {
   auth.clearSession();
   await auth.login();
 
-  return () => {
-    mswServer.close();
-    delete process.env.CCX_BASE_URL;
-    delete process.env.CCX_USERNAME;
-    delete process.env.CCX_PASSWORD;
-  };
 });
 
 afterAll(() => {
@@ -181,6 +176,16 @@ describe("create_database", () => {
       expect(e).toBeInstanceOf(ApiError);
       expect((e as InstanceType<typeof ApiError>).status).toBe(500);
     }
+  });
+
+  it("rejects reserved database name", () => {
+    const err = validateDatabaseName("mysql");
+    expect(err).toContain("reserved");
+  });
+
+  it("rejects empty database name", () => {
+    const err = validateDatabaseName("");
+    expect(err).toContain("cannot be empty");
   });
 
   it("handles database name with underscores and numbers", async () => {

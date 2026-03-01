@@ -26,9 +26,13 @@ export function register(server: McpServer) {
         if (limit !== undefined) params["limit"] = String(limit);
         if (offset !== undefined) params["offset"] = String(offset);
 
-        const raw = await get("/deployment/v3/data-stores", params);
-        const response = raw as DatastoreListResponse;
-        const stores: DatastoreInfo[] = response.datastores ?? [];
+        const raw = await get("/deployment/v3/data-stores", params) as Record<string, unknown>;
+        // API returns { pagination, data_stores } with CCX-Owner header,
+        // or { total, datastores } without it — handle both.
+        const stores: DatastoreInfo[] =
+          (raw.data_stores as DatastoreInfo[] | undefined) ??
+          (raw.datastores as DatastoreInfo[] | undefined) ??
+          [];
 
         if (stores.length === 0) {
           return {
@@ -61,7 +65,7 @@ export function register(server: McpServer) {
               type: "text" as const,
               text: JSON.stringify(
                 {
-                  total: response.total ?? stores.length,
+                  total: (raw.pagination as { total?: number })?.total ?? (raw.total as number | undefined) ?? stores.length,
                   datastores: summary,
                 },
                 null,

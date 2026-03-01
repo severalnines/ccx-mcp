@@ -28,6 +28,7 @@ import { register as registerRestoreBackup } from "./tools/restore_backup.js";
 import { register as registerGetTopQueries } from "./tools/get_top_queries.js";
 import { register as registerGetStats } from "./tools/get_stats.js";
 import { register as registerAddNode } from "./tools/add_node.js";
+import { register as registerDeleteDatabase } from "./tools/delete_database.js";
 
 async function main() {
   // Validate env vars
@@ -45,8 +46,7 @@ async function main() {
     process.stderr.write(
       `Error: Missing required environment variables: ${missing.join(", ")}\n` +
         `\nFor password auth, set: CCX_BASE_URL, CCX_USERNAME, CCX_PASSWORD` +
-        `\nFor OAuth2 auth, set: CCX_BASE_URL, CCX_CLIENT_ID, CCX_CLIENT_SECRET` +
-        `\n\nRead more at https://github.com/severalnines/ccx-mcp\n`,
+        `\nFor OAuth2 auth, set: CCX_BASE_URL, CCX_CLIENT_ID, CCX_CLIENT_SECRET\n`,
     );
     process.exit(1);
   }
@@ -89,6 +89,7 @@ async function main() {
   registerGetTopQueries(server);
   registerGetStats(server);
   registerAddNode(server);
+  registerDeleteDatabase(server);
 
   // Start stdio transport
   const transport = new StdioServerTransport();

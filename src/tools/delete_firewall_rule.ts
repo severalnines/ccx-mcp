@@ -6,7 +6,7 @@ import { isProtected, protectedError } from "../protect.js";
 export function register(server: McpServer) {
   server.tool(
     "ccx_delete_firewall_rule",
-    "Remove a trusted source (firewall rule) from a CCX datastore. Revokes the specified CIDR's access to the database. Blocked by protection mode (CCX_PROTECT) by default.",
+    "Remove a trusted source (firewall rule) from a CCX datastore. This is DESTRUCTIVE and may lock out applications or users. You must set confirm to true. Revokes the specified CIDR's access to the database. Blocked by protection mode (CCX_PROTECT) by default.",
     {
       datastore_uuid: z
         .string()
@@ -14,9 +14,24 @@ export function register(server: McpServer) {
       source: z
         .string()
         .describe("CIDR to remove (must match an existing rule exactly, e.g. '10.0.0.0/24')"),
+      confirm: z
+        .boolean()
+        .describe("Must be explicitly set to true to confirm deletion"),
     },
-    async ({ datastore_uuid, source }) => {
+    async ({ datastore_uuid, source, confirm }) => {
       if (isProtected()) return protectedError("Delete firewall rule");
+
+      if (!confirm) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: "Deletion aborted: 'confirm' must be explicitly set to true. Removing a firewall rule may lock out applications or users from database access.",
+            },
+          ],
+          isError: true,
+        };
+      }
 
       try {
         await del(
