@@ -45,7 +45,8 @@ async function main() {
     process.stderr.write(
       `Error: Missing required environment variables: ${missing.join(", ")}\n` +
         `\nFor password auth, set: CCX_BASE_URL, CCX_USERNAME, CCX_PASSWORD` +
-        `\nFor OAuth2 auth, set: CCX_BASE_URL, CCX_CLIENT_ID, CCX_CLIENT_SECRET\n`,
+        `\nFor OAuth2 auth, set: CCX_BASE_URL, CCX_CLIENT_ID, CCX_CLIENT_SECRET` +
+        `\n\nRead more at https://github.com/severalnines/ccx-mcp\n`,
     );
     process.exit(1);
   }
