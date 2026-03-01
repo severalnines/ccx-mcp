@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "ccx": {
+      "command": "node",
+      "args": ["build/index.js"],
+      "env": {
+        "CCX_BASE_URL": "${CCX_BASE_URL}",
+        "CCX_USERNAME": "${CCX_USERNAME:-}",
+        "CCX_PASSWORD": "${CCX_PASSWORD:-}",
+        "CCX_CLIENT_ID": "${CCX_CLIENT_ID:-}",
+        "CCX_CLIENT_SECRET": "${CCX_CLIENT_SECRET:-}",
+        "CCX_PROTECT": "${CCX_PROTECT:-true}"
+      }
+    }
+  }
+}

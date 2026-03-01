@@ -6,10 +6,9 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/severalnines/ccx-backend.git",
-    "directory": "mcp"
+    "url": "https://github.com/severalnines/ccx-mcp.git"
   },
-  "homepage": "https://github.com/severalnines/ccx-backend/tree/main/mcp#readme",
+  "homepage": "https://github.com/severalnines/ccx-mcp#readme",
   "keywords": [
     "mcp",
     "model-context-protocol",

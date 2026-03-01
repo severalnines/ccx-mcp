@@ -122,6 +122,25 @@ For programmatic or CI/CD use, set `CCX_CLIENT_ID` and `CCX_CLIENT_SECRET` inste
 | `ccx_get_top_queries` | Get slowest queries ranked by execution time |
 | `ccx_get_stats` | Get performance metrics (CPU, memory, disk, network, SQL, DB stats) |
 
+## Protection Mode
+
+Destructive operations are **blocked by default** to prevent accidental data loss. The following tools are affected:
+
+- `ccx_delete_datastore` — deletes an entire database cluster
+- `ccx_delete_db_user` — deletes a database user account
+- `ccx_delete_firewall_rule` — removes a firewall access rule
+- `ccx_restore_backup` — overwrites current data with a backup
+
+To allow destructive operations, set `CCX_PROTECT=false` in your MCP configuration and restart the server:
+
+```json
+{
+  "env": {
+    "CCX_PROTECT": "false"
+  }
+}
+```
+
 ## Supported Databases
 
 - PostgreSQL
