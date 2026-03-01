@@ -50,6 +50,11 @@ Then point your MCP client to the built server:
   }
 }
 ```
+Or use OAUTH2 credentials (create them under Accounts -> Security in the CCX UI):
+```
+    "CCX_CLIENT_ID": "your-client-id",
+    "CCX_CLIENT_SECRET": "your-client-secret"
+```    
 
 ### Where to put the configuration
 
