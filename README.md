@@ -33,14 +33,14 @@ npm install
 npm run build
 ```
 
-Then point your MCP client to the built server:
+Then point your MCP client to the built server (replace the path with where you cloned the repo):
 
 ```json
 {
   "mcpServers": {
     "ccx": {
       "command": "node",
-      "args": ["/absolute/path/to/ccx-mcp/build/index.js"],
+      "args": ["/home/user/ccx-mcp/build/index.js"],
       "env": {
         "CCX_BASE_URL": "https://app.myccx.io",
         "CCX_USERNAME": "your-email@example.com",
