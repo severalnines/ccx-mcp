@@ -156,6 +156,7 @@ For programmatic or CI/CD use, set `CCX_CLIENT_ID` and `CCX_CLIENT_SECRET` inste
 |------|-------------|
 | `ccx_list_databases` | List databases on a datastore |
 | `ccx_create_database` | Create a new database |
+| `ccx_delete_database` | Delete a database |
 
 ### Database Users
 
@@ -193,6 +194,7 @@ Destructive operations are **blocked by default** to prevent accidental data los
 
 - `ccx_delete_datastore` — deletes an entire database cluster
 - `ccx_delete_db_user` — deletes a database user account
+- `ccx_delete_database` — deletes a database
 - `ccx_delete_firewall_rule` — removes a firewall access rule
 - `ccx_restore_backup` — overwrites current data with a backup
 
