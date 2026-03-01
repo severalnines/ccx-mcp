@@ -1,6 +1,6 @@
 # @severalnines/ccx-mcp
 
-MCP (Model Context Protocol) server for managing [CCX](https://ccx.severalnines.com) database clusters through AI assistants like Claude Code, Claude Desktop, Cursor, and Windsurf.
+MCP (Model Context Protocol) server for managing [CCX](https://severalnines.com/ccx) database clusters through AI assistants like Claude Code, Claude Desktop, Cursor, and Windsurf.
 
 ## Quick Start
 
@@ -169,7 +169,7 @@ npm run test:watch
 ## Requirements
 
 - Node.js 18+
-- A CCX account at [ccx.severalnines.com](https://ccx.severalnines.com)
+- A CCX account at [ccx.severalnines.com](https://severalnines.com/ccx)
 
 ## License
 
