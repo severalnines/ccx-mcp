@@ -77,6 +77,14 @@ export async function patch(
   return request("PATCH", path, body);
 }
 
+export async function put(
+  path: string,
+  body?: unknown,
+  params?: Record<string, string>,
+): Promise<unknown> {
+  return request("PUT", path, body, params);
+}
+
 export async function del(
   path: string,
   body?: unknown,

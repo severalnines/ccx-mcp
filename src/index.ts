@@ -29,6 +29,13 @@ import { register as registerGetTopQueries } from "./tools/get_top_queries.js";
 import { register as registerGetStats } from "./tools/get_stats.js";
 import { register as registerAddNode } from "./tools/add_node.js";
 import { register as registerDeleteDatabase } from "./tools/delete_database.js";
+import { register as registerListParameterGroups } from "./tools/list_parameter_groups.js";
+import { register as registerGetParameterGroup } from "./tools/get_parameter_group.js";
+import { register as registerListDefaultParameters } from "./tools/list_default_parameters.js";
+import { register as registerCreateParameterGroup } from "./tools/create_parameter_group.js";
+import { register as registerUpdateParameterGroup } from "./tools/update_parameter_group.js";
+import { register as registerDeleteParameterGroup } from "./tools/delete_parameter_group.js";
+import { register as registerApplyParameterGroup } from "./tools/apply_parameter_group.js";
 
 async function main() {
   // Validate env vars
@@ -90,6 +97,13 @@ async function main() {
   registerGetStats(server);
   registerAddNode(server);
   registerDeleteDatabase(server);
+  registerListParameterGroups(server);
+  registerGetParameterGroup(server);
+  registerListDefaultParameters(server);
+  registerCreateParameterGroup(server);
+  registerUpdateParameterGroup(server);
+  registerDeleteParameterGroup(server);
+  registerApplyParameterGroup(server);
 
   // Start stdio transport
   const transport = new StdioServerTransport();
