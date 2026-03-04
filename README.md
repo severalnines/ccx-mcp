@@ -24,6 +24,32 @@ Add this to your MCP client configuration:
 }
 ```
 
+### Alternative: install as a project dependency
+
+If `npx` causes issues (e.g. spawning errors or version caching problems), you can install the package as a dependency and reference it directly:
+
+```bash
+npm install @severalnines/ccx-mcp
+```
+
+Then use this configuration:
+
+```json
+{
+  "mcpServers": {
+    "ccx": {
+      "command": "node",
+      "args": ["node_modules/@severalnines/ccx-mcp/build/index.js"],
+      "env": {
+        "CCX_BASE_URL": "https://app.myccx.io",
+        "CCX_USERNAME": "your-email@example.com",
+        "CCX_PASSWORD": "your-password"
+      }
+    }
+  }
+}
+```
+
 ### Install from source
 
 ```bash

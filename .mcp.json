@@ -2,7 +2,7 @@
   "mcpServers": {
     "ccx": {
       "command": "node",
-      "args": ["build/index.js"],
+      "args": ["node_modules/@severalnines/ccx-mcp/build/index.js"],
       "env": {
         "CCX_BASE_URL": "${CCX_BASE_URL}",
         "CCX_USERNAME": "${CCX_USERNAME:-}",
