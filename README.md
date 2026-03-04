@@ -102,6 +102,8 @@ Then ask your AI assistant things like:
 - "Show me the slowest queries on my database"
 - "List backups for my production cluster"
 - "What's the CPU usage on my database?"
+- "List the default parameters for PostgreSQL 16"
+- "Create a parameter group for MySQL 8.4 with max_connections set to 500"
 
 ## Authentication
 
@@ -186,6 +188,18 @@ For programmatic or CI/CD use, set `CCX_CLIENT_ID` and `CCX_CLIENT_SECRET` inste
 | `ccx_list_backups` | List available backups with status, type, and timestamps |
 | `ccx_restore_backup` | Restore from a backup with optional point-in-time recovery |
 
+### Parameter Groups
+
+| Tool | Description |
+|------|-------------|
+| `ccx_list_parameter_groups` | List parameter groups with optional filtering by vendor, version, or name |
+| `ccx_get_parameter_group` | Get a parameter group with its full list of parameters |
+| `ccx_create_parameter_group` | Create a new parameter group with custom database configuration |
+| `ccx_update_parameter_group` | Update parameters, optionally syncing changes to all associated datastores |
+| `ccx_delete_parameter_group` | Delete a parameter group (requires explicit confirmation) |
+| `ccx_apply_parameter_group` | Apply a parameter group to a datastore |
+| `ccx_list_default_parameters` | Get default parameters for a vendor and version to see available options |
+
 ### Monitoring & Performance
 
 | Tool | Description |
@@ -202,6 +216,8 @@ Destructive operations are **blocked by default** to prevent accidental data los
 - `ccx_delete_database` — deletes a database
 - `ccx_delete_firewall_rule` — removes a firewall access rule
 - `ccx_restore_backup` — overwrites current data with a backup
+- `ccx_delete_parameter_group` — deletes a parameter group
+- `ccx_apply_parameter_group` — applies configuration changes to a datastore
 
 To allow destructive operations, set `CCX_PROTECT=false` in your MCP configuration and restart the server:
 
