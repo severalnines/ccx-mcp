@@ -37,7 +37,81 @@ import { register as registerUpdateParameterGroup } from "./tools/update_paramet
 import { register as registerDeleteParameterGroup } from "./tools/delete_parameter_group.js";
 import { register as registerApplyParameterGroup } from "./tools/apply_parameter_group.js";
 
+const USAGE = `Usage: ccx-mcp [options]
+
+Options:
+  --endpoint <url>           CCX base URL (e.g. https://app.myccx.io)
+  --client-id <id>           OAuth2 client ID
+  --client-secret <secret>   OAuth2 client secret
+  --username <email>         Account email (password auth)
+  --password <password>      Account password (password auth)
+  --protect <true|false>     Protection mode for destructive ops (default: true)
+  -h, --help                 Show this help and exit
+
+Environment variables (used when a flag is not given):
+  CCX_BASE_URL, CCX_CLIENT_ID, CCX_CLIENT_SECRET,
+  CCX_USERNAME, CCX_PASSWORD, CCX_PROTECT
+
+Authentication:
+  OAuth2 (recommended): pass --client-id and --client-secret.
+  Password: pass --username and --password.
+`;
+
+function parseArgs(argv: string[]): Record<string, string> {
+  const flags: Record<string, string> = {};
+  const aliases: Record<string, string> = {
+    endpoint: "CCX_BASE_URL",
+    "client-id": "CCX_CLIENT_ID",
+    "client-secret": "CCX_CLIENT_SECRET",
+    username: "CCX_USERNAME",
+    password: "CCX_PASSWORD",
+    protect: "CCX_PROTECT",
+  };
+
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === "-h" || arg === "--help") {
+      process.stdout.write(USAGE);
+      process.exit(0);
+    }
+    if (!arg.startsWith("--")) {
+      process.stderr.write(`Unknown argument: ${arg}\n\n${USAGE}`);
+      process.exit(2);
+    }
+
+    const eq = arg.indexOf("=");
+    const name = eq >= 0 ? arg.slice(2, eq) : arg.slice(2);
+    const envName = aliases[name];
+    if (!envName) {
+      process.stderr.write(`Unknown flag: --${name}\n\n${USAGE}`);
+      process.exit(2);
+    }
+
+    let value: string | undefined;
+    if (eq >= 0) {
+      value = arg.slice(eq + 1);
+    } else {
+      value = argv[i + 1];
+      if (value === undefined || value.startsWith("--")) {
+        process.stderr.write(`Missing value for --${name}\n\n${USAGE}`);
+        process.exit(2);
+      }
+      i++;
+    }
+
+    flags[envName] = value;
+  }
+
+  return flags;
+}
+
 async function main() {
+  // Parse CLI flags and apply to env (flags override env vars)
+  const flags = parseArgs(process.argv.slice(2));
+  for (const [key, value] of Object.entries(flags)) {
+    process.env[key] = value;
+  }
+
   // Validate env vars
   const required = ["CCX_BASE_URL"];
   const authMethod = process.env.CCX_CLIENT_ID ? "oauth2" : "password";
@@ -51,9 +125,10 @@ async function main() {
   const missing = required.filter((v) => !process.env[v]);
   if (missing.length > 0) {
     process.stderr.write(
-      `Error: Missing required environment variables: ${missing.join(", ")}\n` +
-        `\nFor password auth, set: CCX_BASE_URL, CCX_USERNAME, CCX_PASSWORD` +
-        `\nFor OAuth2 auth, set: CCX_BASE_URL, CCX_CLIENT_ID, CCX_CLIENT_SECRET\n`,
+      `Error: Missing required configuration: ${missing.join(", ")}\n` +
+        `\nFor OAuth2 auth, pass --endpoint, --client-id, --client-secret.` +
+        `\nFor password auth, pass --endpoint, --username, --password.\n` +
+        `\nRun with --help for usage.\n`,
     );
     process.exit(1);
   }

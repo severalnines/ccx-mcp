@@ -4,6 +4,35 @@ MCP (Model Context Protocol) server for managing [CCX](https://severalnines.com/
 
 ## Quick Start
 
+### Install via Claude Code
+
+After installing the package (`npm install -g @severalnines/ccx-mcp` or as a project dependency), register it with Claude Code in one command:
+
+```bash
+claude mcp add ccx -- ccx-mcp \
+  --endpoint https://app.myccx.io \
+  --client-id <your-client-id> \
+  --client-secret <your-client-secret>
+```
+
+Create OAuth2 credentials in the CCX UI under **Account > Security**.
+
+To disable protection mode (allow destructive operations) add `--protect false`.
+
+CLI flags override environment variables. Available flags:
+
+| Flag | Maps to |
+|------|---------|
+| `--endpoint <url>` | `CCX_BASE_URL` |
+| `--client-id <id>` | `CCX_CLIENT_ID` |
+| `--client-secret <secret>` | `CCX_CLIENT_SECRET` |
+| `--username <email>` | `CCX_USERNAME` |
+| `--password <password>` | `CCX_PASSWORD` |
+| `--protect <true\|false>` | `CCX_PROTECT` |
+| `-h`, `--help` | Show usage |
+
+For password auth, use `--username` and `--password` in place of `--client-id` / `--client-secret`.
+
 ### Install from npm
 
 Add this to your MCP client configuration:
