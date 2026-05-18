@@ -4,12 +4,12 @@ MCP (Model Context Protocol) server for managing [CCX](https://severalnines.com/
 
 ## Quick Start
 
-### Install via Claude Code
+## Claude Code
 
-After installing the package (`npm install -g @severalnines/ccx-mcp` or as a project dependency), register it with Claude Code in one command:
+Register the server in one command — no manual config file editing required:
 
 ```bash
-claude mcp add ccx -- ccx-mcp \
+claude mcp add ccx -- npx -y @severalnines/ccx-mcp@latest \
   --endpoint https://app.myccx.io \
   --client-id <your-client-id> \
   --client-secret <your-client-secret>
@@ -17,12 +17,41 @@ claude mcp add ccx -- ccx-mcp \
 
 Create OAuth2 credentials in the CCX UI under **Account > Security**.
 
-To disable protection mode (allow destructive operations) add `--protect false`.
+Then restart Claude Code (or run `/mcp` and reconnect) and you're ready to go.
 
-CLI flags override environment variables. Available flags:
+### Password auth instead of OAuth2
 
-| Flag | Maps to |
-|------|---------|
+Use `--username` and `--password` in place of `--client-id` / `--client-secret`:
+
+```bash
+claude mcp add ccx -- npx -y @severalnines/ccx-mcp@latest \
+  --endpoint https://app.myccx.io \
+  --username your-email@example.com \
+  --password your-password
+```
+
+### Allow destructive operations
+
+Destructive tools (delete cluster, delete user, restore backup, etc.) are blocked by default. To allow them, add `--protect false`:
+
+```bash
+claude mcp add ccx -- npx -y @severalnines/ccx-mcp@latest \
+  --endpoint https://app.myccx.io \
+  --client-id <id> --client-secret <secret> \
+  --protect false
+```
+
+### Managing the server
+
+```bash
+claude mcp list           # show registered servers
+claude mcp remove ccx     # remove the server
+```
+
+### All available flags
+
+| Flag | Maps to env var |
+|------|-----------------|
 | `--endpoint <url>` | `CCX_BASE_URL` |
 | `--client-id <id>` | `CCX_CLIENT_ID` |
 | `--client-secret <secret>` | `CCX_CLIENT_SECRET` |
@@ -31,7 +60,12 @@ CLI flags override environment variables. Available flags:
 | `--protect <true\|false>` | `CCX_PROTECT` |
 | `-h`, `--help` | Show usage |
 
-For password auth, use `--username` and `--password` in place of `--client-id` / `--client-secret`.
+CLI flags override environment variables when both are set.
+
+### Tips
+
+- **Pin `@latest`** in the `npx` invocation (as shown above). Without a version pin, `npx` may serve a stale cached build instead of fetching the newest from npm.
+- If you have an old `node_modules/@severalnines/ccx-mcp` from a previous install in your project, delete it — `npx` will resolve to it before checking the registry and run the wrong version.
 
 ### Install from npm
 
