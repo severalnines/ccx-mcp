@@ -252,7 +252,7 @@ For programmatic or CI/CD use, set `CCX_CLIENT_ID` and `CCX_CLIENT_SECRET` inste
 |------|-------------|
 | `ccx_list_databases` | List databases on a datastore |
 | `ccx_create_database` | Create a new database |
-| `ccx_delete_database` | Delete a database |
+| `ccx_delete_database` | Delete a database (requires explicit confirmation) |
 
 ### Database Users
 
@@ -286,7 +286,7 @@ For programmatic or CI/CD use, set `CCX_CLIENT_ID` and `CCX_CLIENT_SECRET` inste
 | `ccx_create_parameter_group` | Create a new parameter group with custom database configuration |
 | `ccx_update_parameter_group` | Update parameters, optionally syncing changes to all associated datastores |
 | `ccx_delete_parameter_group` | Delete a parameter group (requires explicit confirmation) |
-| `ccx_apply_parameter_group` | Apply a parameter group to a datastore |
+| `ccx_apply_parameter_group` | Apply a parameter group to a datastore (requires explicit confirmation) |
 | `ccx_list_default_parameters` | Get default parameters for a vendor and version to see available options |
 
 ### Monitoring & Performance

@@ -7,7 +7,7 @@ import { validateDatabaseName } from "../validate.js";
 export function register(server: McpServer) {
   server.tool(
     "ccx_delete_database",
-    "Delete a database from a CCX datastore. This is DESTRUCTIVE and cannot be undone. Blocked by protection mode (CCX_PROTECT) by default.",
+    "Delete a database from a CCX datastore. This is DESTRUCTIVE and cannot be undone. You must set confirm to true. Blocked by protection mode (CCX_PROTECT) by default.",
     {
       datastore_uuid: z
         .string()
@@ -15,9 +15,24 @@ export function register(server: McpServer) {
       database_name: z
         .string()
         .describe("Name of the database to delete"),
+      confirm: z
+        .boolean()
+        .describe("Must be explicitly set to true to confirm deletion"),
     },
-    async ({ datastore_uuid, database_name }) => {
+    async ({ datastore_uuid, database_name, confirm }) => {
       if (isProtected()) return protectedError("Delete database");
+
+      if (!confirm) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: "Deletion aborted: 'confirm' must be explicitly set to true. Deleting a database destroys its data and cannot be undone.",
+            },
+          ],
+          isError: true,
+        };
+      }
 
       const validationError = validateDatabaseName(database_name);
       if (validationError) {
