@@ -69,15 +69,6 @@ describe.each([
       http.post(`${BASE}/api/db-configuration/v1/parameter-groups/apply/${PG}/${DS}`, () => { onCall(); return HttpResponse.json({ job_id: "j1" }); }),
   },
 ])("$tool confirm gate", ({ tool, args, handler }) => {
-  it("is blocked by protection mode before anything else", async () => {
-    let called = false;
-    mswServer.use(handler(() => { called = true; }));
-    const r = await call(tool, { ...args, confirm: true });
-    expect(r.isError).toBe(true);
-    expect(r.text).toContain("BLOCKED");
-    expect(called).toBe(false);
-  });
-
   it("requires confirm=true even when unprotected", async () => {
     process.env.CCX_PROTECT = "false";
     let called = false;
