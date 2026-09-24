@@ -1,24 +1,9 @@
 /**
- * Protection mode prevents destructive operations from being executed.
- * Enabled by default — set CCX_PROTECT=false or CCX_PROTECT=0 to disable.
+ * Protection mode is ON unless CCX_PROTECT is "false" or "0". While it is on,
+ * the destructive tools are not registered at all, so an assistant never sees
+ * them. When it is off, every destructive tool still requires confirm=true.
  */
-
 export function isProtected(): boolean {
   const val = process.env.CCX_PROTECT?.toLowerCase();
   return val !== "false" && val !== "0";
-}
-
-export function protectedError(operation: string) {
-  return {
-    content: [
-      {
-        type: "text" as const,
-        text:
-          `BLOCKED: "${operation}" is not allowed while protection mode is enabled. ` +
-          `Protection mode prevents destructive operations and is ON by default. ` +
-          `To disable it, set the environment variable CCX_PROTECT=false and restart the MCP server.`,
-      },
-    ],
-    isError: true,
-  };
 }

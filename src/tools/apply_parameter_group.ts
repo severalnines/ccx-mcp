@@ -1,12 +1,11 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { post } from "../client.js";
-import { isProtected, protectedError } from "../protect.js";
 
 export function register(server: McpServer) {
   server.tool(
     "ccx_apply_parameter_group",
-    "Apply a parameter group to a datastore. This creates a job on the cluster to update its database configuration, which may restart database processes. You must set confirm to true. Blocked by protection mode (CCX_PROTECT) by default.",
+    "Apply a parameter group to a datastore. This creates a job on the cluster to update its database configuration, which may restart database processes. You must set confirm to true. Only available when protection mode is off (CCX_PROTECT=false).",
     {
       parameter_group_uuid: z
         .string()
@@ -19,7 +18,6 @@ export function register(server: McpServer) {
         .describe("Must be explicitly set to true to confirm applying the configuration change"),
     },
     async ({ parameter_group_uuid, datastore_uuid, confirm }) => {
-      if (isProtected()) return protectedError("Apply parameter group");
 
       if (!confirm) {
         return {

@@ -1,12 +1,11 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { post } from "../client.js";
-import { isProtected, protectedError } from "../protect.js";
 
 export function register(server: McpServer) {
   server.tool(
     "ccx_restore_backup",
-    "Restore a CCX datastore from a backup. This is a DESTRUCTIVE operation that replaces current data with the backup contents. Use ccx_list_backups first to find available backup IDs. Blocked by protection mode (CCX_PROTECT) by default.",
+    "Restore a CCX datastore from a backup. This is a DESTRUCTIVE operation that replaces current data with the backup contents. Use ccx_list_backups first to find available backup IDs. Only available when protection mode is off (CCX_PROTECT=false).",
     {
       datastore_uuid: z
         .string()
@@ -23,7 +22,6 @@ export function register(server: McpServer) {
         .describe("Must be explicitly set to true to confirm the restore. This operation replaces current data."),
     },
     async ({ datastore_uuid, backup_id, pitr_stop_time, confirm }) => {
-      if (isProtected()) return protectedError("Restore backup");
 
       if (!confirm) {
         return {

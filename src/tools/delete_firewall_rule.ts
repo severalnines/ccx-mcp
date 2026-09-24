@@ -1,12 +1,11 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { del } from "../client.js";
-import { isProtected, protectedError } from "../protect.js";
 
 export function register(server: McpServer) {
   server.tool(
     "ccx_delete_firewall_rule",
-    "Remove a trusted source (firewall rule) from a CCX datastore. This is DESTRUCTIVE and may lock out applications or users. You must set confirm to true. Revokes the specified CIDR's access to the database. Blocked by protection mode (CCX_PROTECT) by default.",
+    "Remove a trusted source (firewall rule) from a CCX datastore. This is DESTRUCTIVE and may lock out applications or users. You must set confirm to true. Revokes the specified CIDR's access to the database. Only available when protection mode is off (CCX_PROTECT=false).",
     {
       datastore_uuid: z
         .string()
@@ -19,7 +18,6 @@ export function register(server: McpServer) {
         .describe("Must be explicitly set to true to confirm deletion"),
     },
     async ({ datastore_uuid, source, confirm }) => {
-      if (isProtected()) return protectedError("Delete firewall rule");
 
       if (!confirm) {
         return {

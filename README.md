@@ -48,7 +48,7 @@ claude mcp add ccx -- npx -y @severalnines/ccx-mcp@latest \
 
 ### Allow destructive operations
 
-Destructive tools (delete cluster, delete user, restore backup, etc.) are blocked by default. To allow them, add `--protect false`:
+Destructive tools (delete datastore, delete database/user/firewall rule/parameter group, apply parameter group, restore backup) are not registered at all by default, so an assistant never sees them. To enable them, add `--protect false`; each then still requires `confirm: true`:
 
 ```bash
 claude mcp add ccx -- npx -y @severalnines/ccx-mcp@latest \
@@ -314,17 +314,21 @@ For programmatic or CI/CD use, set `CCX_CLIENT_ID` and `CCX_CLIENT_SECRET` inste
 
 ## Protection Mode
 
-Destructive operations are **blocked by default** to prevent accidental data loss. The following tools are affected:
+Protection mode is **on by default**. While it is on, the destructive tools are
+**not registered**: they do not appear in the tool list, so an AI assistant
+cannot attempt them at all. The affected tools are:
 
-- `ccx_delete_datastore` — deletes an entire database cluster
-- `ccx_delete_db_user` — deletes a database user account
-- `ccx_delete_database` — deletes a database
-- `ccx_delete_firewall_rule` — removes a firewall access rule
-- `ccx_restore_backup` — overwrites current data with a backup
-- `ccx_delete_parameter_group` — deletes a parameter group
-- `ccx_apply_parameter_group` — applies configuration changes to a datastore
+- `ccx_delete_datastore`
+- `ccx_delete_database`
+- `ccx_delete_db_user`
+- `ccx_delete_firewall_rule`
+- `ccx_delete_parameter_group`
+- `ccx_apply_parameter_group`
+- `ccx_restore_backup`
 
-To allow destructive operations, set `CCX_PROTECT=false` in your MCP configuration and restart the server:
+To make them available, set `CCX_PROTECT=false` (or `--protect false`) and
+restart the server. Every one of these tools then still requires
+`confirm: true` in the call; without it the tool refuses and makes no request.
 
 ```json
 {
@@ -333,6 +337,8 @@ To allow destructive operations, set `CCX_PROTECT=false` in your MCP configurati
   }
 }
 ```
+
+The setting is read once at startup and never changes while the server runs.
 
 ## Supported Databases
 

@@ -1,13 +1,12 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { del } from "../client.js";
-import { isProtected, protectedError } from "../protect.js";
 import { validateDatabaseName } from "../validate.js";
 
 export function register(server: McpServer) {
   server.tool(
     "ccx_delete_database",
-    "Delete a database from a CCX datastore. This is DESTRUCTIVE and cannot be undone. You must set confirm to true. Blocked by protection mode (CCX_PROTECT) by default.",
+    "Delete a database from a CCX datastore. This is DESTRUCTIVE and cannot be undone. You must set confirm to true. Only available when protection mode is off (CCX_PROTECT=false).",
     {
       datastore_uuid: z
         .string()
@@ -20,7 +19,6 @@ export function register(server: McpServer) {
         .describe("Must be explicitly set to true to confirm deletion"),
     },
     async ({ datastore_uuid, database_name, confirm }) => {
-      if (isProtected()) return protectedError("Delete database");
 
       if (!confirm) {
         return {

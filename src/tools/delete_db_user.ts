@@ -1,12 +1,11 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { del } from "../client.js";
-import { isProtected, protectedError } from "../protect.js";
 
 export function register(server: McpServer) {
   server.tool(
     "ccx_delete_db_user",
-    "Delete a database user from a CCX datastore. This is DESTRUCTIVE and may break applications using this user. You must set confirm to true. Use ccx_list_db_users first to see existing users and their host restrictions. Blocked by protection mode (CCX_PROTECT) by default.",
+    "Delete a database user from a CCX datastore. This is DESTRUCTIVE and may break applications using this user. You must set confirm to true. Use ccx_list_db_users first to see existing users and their host restrictions. Only available when protection mode is off (CCX_PROTECT=false).",
     {
       datastore_uuid: z
         .string()
@@ -23,7 +22,6 @@ export function register(server: McpServer) {
         .describe("Must be explicitly set to true to confirm deletion"),
     },
     async ({ datastore_uuid, username, host, confirm }) => {
-      if (isProtected()) return protectedError("Delete database user");
 
       if (!confirm) {
         return {
