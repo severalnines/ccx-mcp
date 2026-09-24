@@ -2,6 +2,22 @@
 
 MCP (Model Context Protocol) server for managing [CCX](https://severalnines.com/ccx) database clusters through AI assistants like Claude Code, Claude Desktop, Cursor, and Windsurf.
 
+## Installation
+
+The server is published on npm as
+[`@severalnines/ccx-mcp`](https://www.npmjs.com/package/@severalnines/ccx-mcp).
+Node.js 18 or newer is required. Pick one of:
+
+| Method | Command | When |
+|--------|---------|------|
+| `npx` (no install) | `npx -y @severalnines/ccx-mcp@latest` | Default; the MCP client fetches the latest release on start |
+| Global install | `npm install -g @severalnines/ccx-mcp` then `ccx-mcp` | Pinned version on your machine |
+| Project dependency | `npm install @severalnines/ccx-mcp` then `node node_modules/@severalnines/ccx-mcp/build/index.js` | When `npx` caching or spawning causes trouble (see [below](#alternative-install-as-a-project-dependency)) |
+| From source | `git clone https://github.com/severalnines/ccx-mcp.git && cd ccx-mcp && npm install && npm run build` | Development (see [below](#install-from-source)) |
+
+With a global install, point your MCP client at `"command": "ccx-mcp"` with no
+`args` instead of the `npx` form shown in the examples.
+
 ## Quick Start
 
 ## Claude Code
