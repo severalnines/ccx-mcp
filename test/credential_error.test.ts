@@ -164,6 +164,57 @@ describe("endpoint failures stay distinct", () => {
   });
 });
 
+// A response whose connection drops after the headers, part-way through the body.
+function brokenBody(contentType: string) {
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode('{"access_'));
+      controller.error(new Error("socket hang up"));
+    },
+  });
+  return new HttpResponse(stream, { headers: { "Content-Type": contentType } });
+}
+
+describe("body read failures", () => {
+  it("a connection lost while reading the token response reports the endpoint", async () => {
+    mswServer.use(http.post(`${BASE}/api/auth/oauth2/token`, () => brokenBody("application/json")));
+
+    const auth = await import("../src/auth.js");
+    const error = await auth.login().catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(auth.EndpointError);
+    expect((error as Error).message).toMatch(/^CCX endpoint unreachable or failing at https:\/\/test\.ccx\.dev: /);
+  });
+
+  it("a connection lost while reading an API response reports the endpoint", async () => {
+    mswServer.use(
+      tokenHandler("valid-token"),
+      checkHandler,
+      http.get(`${BASE}/api/test/json`, () => brokenBody("application/json")),
+      http.get(`${BASE}/api/test/text`, () => brokenBody("text/plain")),
+    );
+
+    const auth = await import("../src/auth.js");
+    await auth.login();
+    const { get } = await import("../src/client.js");
+
+    expect(await get("/test/json").catch((e: unknown) => e)).toBeInstanceOf(auth.EndpointError);
+    expect(await get("/test/text").catch((e: unknown) => e)).toBeInstanceOf(auth.EndpointError);
+  });
+
+  it("a malformed JSON body stays a parse error, not an endpoint failure", async () => {
+    mswServer.use(
+      http.post(`${BASE}/api/auth/oauth2/token`, () =>
+        new HttpResponse('{"access_token":', { headers: { "Content-Type": "application/json" } }),
+      ),
+    );
+
+    const auth = await import("../src/auth.js");
+    const error = await auth.login().catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(SyntaxError);
+    expect(error).not.toBeInstanceOf(auth.EndpointError);
+  });
+});
+
 describe("valid credential", () => {
   it("an expired access token is renewed before the call", async () => {
     const seenTokens: string[] = [];

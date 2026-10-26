@@ -34,15 +34,33 @@ function credentialErrorMessage(): string {
   return "CCX login rejected: the username or password is wrong, or the account is disabled. Check CCX_USERNAME and CCX_PASSWORD.";
 }
 
+function networkError(error: unknown): EndpointError {
+  const cause = (error as { cause?: { message?: string } }).cause?.message;
+  const message = error instanceof Error ? error.message : String(error);
+  return new EndpointError(cause ? `${message} (${cause})` : message);
+}
+
 // fetch() that reports a network failure as an EndpointError.
 export async function fetchEndpoint(url: string, init?: RequestInit): Promise<Response> {
   try {
     return await fetch(url, init);
   } catch (error) {
-    const cause = (error as { cause?: { message?: string } }).cause?.message;
-    const message = error instanceof Error ? error.message : String(error);
-    throw new EndpointError(cause ? `${message} (${cause})` : message);
+    throw networkError(error);
   }
+}
+
+// Reads a response body, reporting a connection lost mid-body as an EndpointError.
+export async function readText(response: Response): Promise<string> {
+  try {
+    return await response.text();
+  } catch (error) {
+    throw networkError(error);
+  }
+}
+
+// Like readText(), but parsed; a malformed body still throws its SyntaxError.
+export async function readJson(response: Response): Promise<unknown> {
+  return JSON.parse(await readText(response));
 }
 
 // Maps a failed auth response: 4xx means the credential, 429 and 5xx the endpoint.
@@ -123,7 +141,7 @@ async function loginPassword(): Promise<void> {
   }
 
   // Extract scope for CCX-Owner header
-  const data = (await response.json()) as LoginResponse;
+  const data = (await readJson(response)) as LoginResponse;
   if (data.scopes && data.scopes.length > 0) {
     activeScope = data.scopes[0];
     ownerHeader = `${activeScope.type}:${activeScope.id}`;
@@ -155,7 +173,7 @@ async function loginOAuth2(): Promise<void> {
     throw await authFailure(response, "token request");
   }
 
-  const data = (await response.json()) as {
+  const data = (await readJson(response)) as {
     access_token: string;
     token_type: string;
     expires_in: number;
@@ -177,7 +195,7 @@ async function loginOAuth2(): Promise<void> {
   });
 
   if (checkResponse.ok) {
-    const checkData = (await checkResponse.json()) as LoginResponse;
+    const checkData = (await readJson(checkResponse)) as LoginResponse;
     if (checkData.scopes && checkData.scopes.length > 0) {
       activeScope = checkData.scopes[0];
       ownerHeader = `${activeScope.type}:${activeScope.id}`;

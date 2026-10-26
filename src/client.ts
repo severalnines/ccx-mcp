@@ -5,6 +5,8 @@ import {
   clearSession,
   isLoggedIn,
   fetchEndpoint,
+  readText,
+  readJson,
   CredentialError,
 } from "./auth.js";
 
@@ -67,9 +69,9 @@ async function request(
 
   const contentType = response.headers.get("content-type") ?? "";
   if (contentType.includes("application/json")) {
-    return response.json();
+    return readJson(response);
   }
-  return response.text();
+  return readText(response);
 }
 
 export async function get(
