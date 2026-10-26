@@ -55,7 +55,7 @@ describe("password auth", () => {
 
     const auth = await import("../src/auth.js");
     auth.clearSession();
-    await expect(auth.login()).rejects.toThrow(/Login failed \(401\)/);
+    await expect(auth.login()).rejects.toThrow(/^CCX login rejected: /);
   });
 
   it("clearSession resets all auth state", async () => {
@@ -136,6 +136,6 @@ describe("oauth2 auth", () => {
 
     const auth = await import("../src/auth.js");
     auth.clearSession();
-    await expect(auth.login()).rejects.toThrow(/OAuth2 token request failed \(401\)/);
+    await expect(auth.login()).rejects.toThrow("CCX credential expired, revoked or invalid. Generate a new one at https://test.ccx.dev/settings/credentials");
   });
 });

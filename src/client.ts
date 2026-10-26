@@ -1,4 +1,14 @@
-import { getBaseUrl, getHeaders, login, clearSession } from "./auth.js";
+import {
+  getBaseUrl,
+  getHeaders,
+  login,
+  clearSession,
+  isLoggedIn,
+  fetchEndpoint,
+  readText,
+  readJson,
+  CredentialError,
+} from "./auth.js";
 
 export class ApiError extends Error {
   constructor(
@@ -26,20 +36,28 @@ async function request(
     }
   }
 
+  // Renew an expired OAuth2 token before use rather than waiting for a 401.
+  if (!isLoggedIn()) {
+    await login();
+  }
+
   const headers: Record<string, string> = {
     ...getHeaders(),
     "Content-Type": "application/json",
   };
 
-  const response = await fetch(url.toString(), {
+  const response = await fetchEndpoint(url.toString(), {
     method,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
-  // Auto-retry on 401
-  if (response.status === 401 && !retried) {
+  // Auto-retry on 401 with a fresh login; a second 401 means the credential is bad
+  if (response.status === 401) {
     clearSession();
+    if (retried) {
+      throw new CredentialError();
+    }
     await login();
     return request(method, path, body, params, true);
   }
@@ -51,9 +69,9 @@ async function request(
 
   const contentType = response.headers.get("content-type") ?? "";
   if (contentType.includes("application/json")) {
-    return response.json();
+    return readJson(response);
   }
-  return response.text();
+  return readText(response);
 }
 
 export async function get(

@@ -31,7 +31,7 @@ claude mcp add ccx -- npx -y @severalnines/ccx-mcp@latest \
   --client-secret <your-client-secret>
 ```
 
-Create OAuth2 credentials in the CCX UI under **Account > Security**.
+The easiest way to get this command is the **Connect an AI assistant (MCP)** card in the CCX UI (shown when your CCX operator has enabled it): it creates a credential and gives you the command with the values filled in. You can also create OAuth2 credentials yourself under **Settings > Credentials**.
 
 Then restart Claude Code (or run `/mcp` and reconnect) and you're ready to go.
 
@@ -63,6 +63,20 @@ claude mcp add ccx -- npx -y @severalnines/ccx-mcp@latest \
 claude mcp list           # show registered servers
 claude mcp remove ccx     # remove the server
 ```
+
+### Rotating the credential
+
+When a credential expires or is revoked, ccx-mcp stops with `CCX credential expired, revoked or invalid. Generate a new one at <endpoint>/settings/credentials`. Generate a new credential (the **Connect an AI assistant (MCP)** card gives you both commands below), then replace the registration, since `claude mcp add` refuses a name that is already registered:
+
+```bash
+claude mcp remove ccx -s user
+claude mcp add ccx -s user -- npx -y @severalnines/ccx-mcp@latest \
+  --endpoint https://app.myccx.io \
+  --client-id <new-client-id> \
+  --client-secret <new-client-secret>
+```
+
+If you registered the server without `-s user`, drop it from both commands.
 
 ### All available flags
 
@@ -155,7 +169,7 @@ Then point your MCP client to the built server (replace the path with where you 
   }
 }
 ```
-Or use OAUTH2 credentials (create them under Accounts -> Security in the CCX UI):
+Or use OAUTH2 credentials (create them under Settings > Credentials in the CCX UI):
 ```
     "CCX_CLIENT_ID": "your-client-id",
     "CCX_CLIENT_SECRET": "your-client-secret"
@@ -194,7 +208,7 @@ Replace `CCX_USERNAME` and `CCX_PASSWORD` with `CCX_CLIENT_ID` and `CCX_CLIENT_S
 }
 ```
 
-You can create OAuth2 credentials in the CCX UI under **Account > Security**.
+You can create OAuth2 credentials in the CCX UI under **Settings > Credentials**.
 
 Then ask your AI assistant things like:
 

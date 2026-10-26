@@ -2,7 +2,7 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { login } from "./auth.js";
+import { login, CredentialError, EndpointError } from "./auth.js";
 import { load as loadWizard } from "./wizard.js";
 import { isProtected } from "./protect.js";
 import { registerTools } from "./register.js";
@@ -128,6 +128,7 @@ async function main() {
 }
 
 main().catch((err) => {
-  process.stderr.write(`CCX MCP fatal error: ${err}\n`);
+  const known = err instanceof CredentialError || err instanceof EndpointError;
+  process.stderr.write(`CCX MCP fatal error: ${known ? err.message : err}\n`);
   process.exit(1);
 });
