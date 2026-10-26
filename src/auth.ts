@@ -11,6 +11,49 @@ let tokenExpiresAt: number | null = null;
 
 type AuthMethod = "password" | "oauth2";
 
+// The credential was rejected: expired, revoked, disabled or simply wrong.
+export class CredentialError extends Error {
+  constructor() {
+    super(credentialErrorMessage());
+    this.name = "CredentialError";
+  }
+}
+
+// The endpoint could not be reached or failed (network error or 5xx).
+export class EndpointError extends Error {
+  constructor(detail: string) {
+    super(`CCX endpoint unreachable or failing at ${getBaseUrl()}: ${detail}`);
+    this.name = "EndpointError";
+  }
+}
+
+function credentialErrorMessage(): string {
+  if (getAuthMethod() === "oauth2") {
+    return `CCX credential expired, revoked or invalid. Generate a new one at ${getBaseUrl()}/settings/credentials`;
+  }
+  return "CCX login rejected: the username or password is wrong, or the account is disabled. Check CCX_USERNAME and CCX_PASSWORD.";
+}
+
+// fetch() that reports a network failure as an EndpointError.
+export async function fetchEndpoint(url: string, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, init);
+  } catch (error) {
+    const cause = (error as { cause?: { message?: string } }).cause?.message;
+    const message = error instanceof Error ? error.message : String(error);
+    throw new EndpointError(cause ? `${message} (${cause})` : message);
+  }
+}
+
+// Maps a failed auth response: 4xx means the credential, 429 and 5xx the endpoint.
+async function authFailure(response: Response, what: string): Promise<Error> {
+  if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+    return new CredentialError();
+  }
+  const text = await response.text().catch(() => "");
+  return new EndpointError(`${what} returned ${response.status}: ${text || response.statusText}`);
+}
+
 function getEnv(name: string): string {
   const value = process.env[name];
   if (!value) {
@@ -43,7 +86,7 @@ async function loginPassword(): Promise<void> {
   const baseUrl = getBaseUrl();
   const loginUrl = `${baseUrl}/api/v2/auth/login`;
 
-  const response = await fetch(loginUrl, {
+  const response = await fetchEndpoint(loginUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -53,10 +96,7 @@ async function loginPassword(): Promise<void> {
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(
-      `Login failed (${response.status}): ${text || response.statusText}`,
-    );
+    throw await authFailure(response, "login request");
   }
 
   // Extract session cookie from set-cookie header
@@ -105,17 +145,14 @@ async function loginOAuth2(): Promise<void> {
     client_secret: clientSecret,
   });
 
-  const response = await fetch(tokenUrl, {
+  const response = await fetchEndpoint(tokenUrl, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: body.toString(),
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(
-      `OAuth2 token request failed (${response.status}): ${text || response.statusText}`,
-    );
+    throw await authFailure(response, "token request");
   }
 
   const data = (await response.json()) as {
@@ -135,7 +172,7 @@ async function loginOAuth2(): Promise<void> {
 
   // For OAuth2, we need to get the scopes via the auth check endpoint
   // using the bearer token
-  const checkResponse = await fetch(`${baseUrl}/api/v2/auth/check`, {
+  const checkResponse = await fetchEndpoint(`${baseUrl}/api/v2/auth/check`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 
